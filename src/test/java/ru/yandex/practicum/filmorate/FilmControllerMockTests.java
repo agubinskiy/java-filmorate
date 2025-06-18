@@ -25,13 +25,13 @@ public class FilmControllerMockTests {
     @Test
     public void addFilm_shouldReturn200() throws Exception {
         String film = """
-                            {
-                              "name": "Name",
-                              "description": "Description",
-                              "releaseDate": "2000-10-20",
-                              "duration": 120
-                            }
-                """;
+        {
+          "name": "Name",
+          "description": "Description",
+          "releaseDate": "2000-10-20",
+          "duration": 120
+        }
+        """;
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -42,22 +42,22 @@ public class FilmControllerMockTests {
     @Test
     public void updateFilm_shouldReturn200() throws Exception {
         String film1 = """
-                            {
-                              "name": "Name",
-                              "description": "Description",
-                              "releaseDate": "2000-10-20",
-                              "duration": 120
-                            }
-                """;
+        {
+          "name": "Name",
+          "description": "Description",
+          "releaseDate": "2000-10-20",
+          "duration": 120
+        }
+        """;
         String film2 = """
-                            {
-                              "id": 1,
-                              "name": "Name2",
-                              "description": "Description2",
-                              "releaseDate": "2000-11-21",
-                              "duration": 130
-                            }
-                """;
+        {
+          "id": 1,
+          "name": "Name2",
+          "description": "Description2",
+          "releaseDate": "2000-11-21",
+          "duration": 130
+        }
+        """;
 
         mockMvc.perform(post("/films")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -72,13 +72,13 @@ public class FilmControllerMockTests {
     @Test
     public void getAllFilms_shouldReturn200() throws Exception {
         String film = """
-                            {
-                              "name": "Name",
-                              "description": "Description",
-                              "releaseDate": "2000-10-20",
-                              "duration": 120
-                            }
-                """;
+        {
+          "name": "Name",
+          "description": "Description",
+          "releaseDate": "2000-10-20",
+          "duration": 120
+        }
+        """;
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -97,13 +97,13 @@ public class FilmControllerMockTests {
     @Test
     public void addFilmWithEmptyName_shouldReturn400() throws Exception {
         String film = """
-                            {
-                              "name": "",
-                              "description": "Description",
-                              "releaseDate": "2000-10-20",
-                              "duration": 120
-                            }
-                """;
+        {
+          "name": "",
+          "description": "Description",
+          "releaseDate": "2000-10-20",
+          "duration": 120
+        }
+        """;
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -114,13 +114,13 @@ public class FilmControllerMockTests {
     @Test
     public void addFilmWithBlankName_shouldReturn400() throws Exception {
         String film = """
-                            {
-                              "name": " ",
-                              "description": "Description",
-                              "releaseDate": "2000-10-20",
-                              "duration": 120
-                            }
-                """;
+        {
+          "name": " ",
+          "description": "Description",
+          "releaseDate": "2000-10-20",
+          "duration": 120
+        }
+        """;
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -131,12 +131,12 @@ public class FilmControllerMockTests {
     @Test
     public void addFilmWithoutName_shouldReturn400() throws Exception {
         String film = """
-                            {
-                              "description": "Description",
-                              "releaseDate": "2000-10-20",
-                              "duration": 120
-                            }
-                """;
+        {
+          "description": "Description",
+          "releaseDate": "2000-10-20",
+          "duration": 120
+        }
+        """;
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -147,15 +147,15 @@ public class FilmControllerMockTests {
     @Test
     public void addFilmWith200symbolsDescription_shouldReturn200() throws Exception {
         String film = """
-                            {
-                              "name": "Name",
-                              "description": "Тестовое описание фильма, проверка передачи в поле с описанием более 200 символов. \
-                ТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТест\
-                ТестТестТестТест1",
-                              "releaseDate": "2000-10-20",
-                              "duration": 120
-                            }
-                """;
+        {
+        "name": "Name",
+        "description": "Тестовое описание фильма, проверка передачи в поле с описанием более 200 символов. \
+        ТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТест\
+        ТестТестТестТест1",
+        "releaseDate": "2000-10-20",
+        "duration": 120
+        }
+        """;
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -166,15 +166,15 @@ public class FilmControllerMockTests {
     @Test
     public void addFilmWithTooLongDescription_shouldReturn400() throws Exception {
         String film = """
-                            {
-                              "name": "Name",
-                              "description": "Тестовое описание фильма, проверка передачи в поле с описанием более 200 символов. \
-                ТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТест\
-                ТестТестТестТест11",
-                              "releaseDate": "2000-10-20",
-                              "duration": 120
-                            }
-                """;
+        {
+        "name": "Name",
+        "description": "Тестовое описание фильма, проверка передачи в поле с описанием более 200 символов. \
+        ТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТест\
+        ТестТестТестТест11",
+        "releaseDate": "2000-10-20",
+        "duration": 120
+        }
+        """;
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -185,13 +185,13 @@ public class FilmControllerMockTests {
     @Test
     public void addFilmWithDuration1_shouldReturn200() throws Exception {
         String film = """
-                            {
-                              "name": "Name",
-                              "description": "Description",
-                              "releaseDate": "2000-10-20",
-                              "duration": 1
-                            }
-                """;
+        {
+          "name": "Name",
+          "description": "Description",
+          "releaseDate": "2000-10-20",
+          "duration": 1
+        }
+        """;
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -202,13 +202,13 @@ public class FilmControllerMockTests {
     @Test
     public void addFilmWithDuration0_shouldReturn400() throws Exception {
         String film = """
-                            {
-                              "name": "Name",
-                              "description": "Description",
-                              "releaseDate": "2000-10-20",
-                              "duration": 0
-                            }
-                """;
+        {
+          "name": "Name",
+          "description": "Description",
+          "releaseDate": "2000-10-20",
+          "duration": 0
+        }
+        """;
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -219,13 +219,13 @@ public class FilmControllerMockTests {
     @Test
     public void addFilmWithDurationLessThan0_shouldReturn400() throws Exception {
         String film = """
-                            {
-                              "name": "Name",
-                              "description": "Description",
-                              "releaseDate": "2000-10-20",
-                              "duration": -1
-                            }
-                """;
+        {
+          "name": "Name",
+          "description": "Description",
+          "releaseDate": "2000-10-20",
+          "duration": -1
+        }
+        """;
 
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -236,22 +236,22 @@ public class FilmControllerMockTests {
     @Test
     public void updateFilmWithEmptyName_shouldReturn400() throws Exception {
         String film1 = """
-                            {
-                              "name": "Name",
-                              "description": "Description",
-                              "releaseDate": "2000-10-20",
-                              "duration": 120
-                            }
-                """;
+        {
+          "name": "Name",
+          "description": "Description",
+          "releaseDate": "2000-10-20",
+          "duration": 120
+        }
+        """;
         String film2 = """
-                            {
-                              "id": 1,
-                              "name": "",
-                              "description": "Description2",
-                              "releaseDate": "2000-11-21",
-                              "duration": 130
-                            }
-                """;
+        {
+          "id": 1,
+          "name": "",
+          "description": "Description2",
+          "releaseDate": "2000-11-21",
+          "duration": 130
+        }
+        """;
 
         mockMvc.perform(post("/films")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -266,21 +266,21 @@ public class FilmControllerMockTests {
     @Test
     public void updateFilmWithoutName_shouldReturn400() throws Exception {
         String film1 = """
-                            {
-                              "name": "Name",
-                              "description": "Description",
-                              "releaseDate": "2000-10-20",
-                              "duration": 120
-                            }
-                """;
+        {
+          "name": "Name",
+          "description": "Description",
+          "releaseDate": "2000-10-20",
+          "duration": 120
+        }
+        """;
         String film2 = """
-                            {
-                              "id": 1,
-                              "description": "Description2",
-                              "releaseDate": "2000-11-21",
-                              "duration": 130
-                            }
-                """;
+        {
+          "id": 1,
+          "description": "Description2",
+          "releaseDate": "2000-11-21",
+          "duration": 130
+        }
+        """;
 
         mockMvc.perform(post("/films")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -295,24 +295,24 @@ public class FilmControllerMockTests {
     @Test
     public void updateFilmWithTooLongDescription_shouldReturn400() throws Exception {
         String film1 = """
-                            {
-                              "name": "Name",
-                              "description": "Description",
-                              "releaseDate": "2000-10-20",
-                              "duration": 120
-                            }
-                """;
+        {
+          "name": "Name",
+          "description": "Description",
+          "releaseDate": "2000-10-20",
+          "duration": 120
+        }
+        """;
         String film2 = """
-                            {
-                              "id": 1,
-                              "name": "Name2",
-                              "description": "Тестовое описание фильма, проверка передачи в поле с описанием более 200 символов. \
-                            ТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТест\
-                            ТестТестТестТест11",
-                              "releaseDate": "2000-11-21",
-                              "duration": 130
-                            }
-                """;
+        {
+        "id": 1,
+        "name": "Name2",
+        "description": "Тестовое описание фильма, проверка передачи в поле с описанием более 200 символов. \
+        ТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТестТест\
+        ТестТестТестТест11",
+        "releaseDate": "2000-11-21",
+        "duration": 130
+        }
+        """;
 
         mockMvc.perform(post("/films")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -327,22 +327,22 @@ public class FilmControllerMockTests {
     @Test
     public void updateFilmWithDuration0_shouldReturn400() throws Exception {
         String film1 = """
-                            {
-                              "name": "Name",
-                              "description": "Description",
-                              "releaseDate": "2000-10-20",
-                              "duration": 120
-                            }
-                """;
+        {
+        "name": "Name",
+        "description": "Description",
+        "releaseDate": "2000-10-20",
+        "duration": 120
+        }
+        """;
         String film2 = """
-                            {
-                              "id": 1,
-                              "name": "Name2",
-                              "description": "Description2",
-                              "releaseDate": "2000-11-21",
-                              "duration": 0
-                            }
-                """;
+        {
+        "id": 1,
+        "name": "Name2",
+        "description": "Description2",
+        "releaseDate": "2000-11-21",
+        "duration": 0
+        }
+        """;
 
         mockMvc.perform(post("/films")
                 .contentType(MediaType.APPLICATION_JSON)

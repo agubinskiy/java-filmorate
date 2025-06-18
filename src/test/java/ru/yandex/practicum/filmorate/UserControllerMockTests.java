@@ -25,13 +25,13 @@ public class UserControllerMockTests {
     @Test
     public void addUser_shouldReturn200() throws Exception {
         String user = """
-                        {
-                          "login": "login",
-                          "name": "Name",
-                          "email": "mail@mail.ru",
-                          "birthday": "2000-10-20"
-                        }
-                """;
+        {
+          "login": "login",
+          "name": "Name",
+          "email": "mail@mail.ru",
+          "birthday": "2000-10-20"
+        }
+        """;
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -42,22 +42,22 @@ public class UserControllerMockTests {
     @Test
     public void updateUser_shouldReturn200() throws Exception {
         String user1 = """
-                        {
-                          "login": "login",
-                          "name": "Name",
-                          "email": "mail@mail.ru",
-                          "birthday": "2000-10-20"
-                        }
-                """;
+        {
+        "login": "login",
+        "name": "Name",
+        "email": "mail@mail.ru",
+        "birthday": "2000-10-20"
+        }
+        """;
         String user2 = """
-                        {
-                          "id": 1,
-                          "login": "login2",
-                          "name": "Name2",
-                          "email": "mail2@mail.ru",
-                          "birthday": "2000-11-21"
-                        }
-                """;
+        {
+        "id": 1,
+        "login": "login2",
+        "name": "Name2",
+        "email": "mail2@mail.ru",
+        "birthday": "2000-11-21"
+        }
+        """;
 
         mockMvc.perform(post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -72,13 +72,13 @@ public class UserControllerMockTests {
     @Test
     public void getAllUsers_shouldReturn200() throws Exception {
         String user = """
-                        {
-                          "login": "login",
-                          "name": "Name",
-                          "email": "mail@mail.ru",
-                          "birthday": "2000-10-20"
-                        }
-                """;
+        {
+        "login": "login",
+        "name": "Name",
+        "email": "mail@mail.ru",
+        "birthday": "2000-10-20"
+        }
+        """;
 
         mockMvc.perform(post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -96,13 +96,13 @@ public class UserControllerMockTests {
     @Test
     public void addUserWithEmptyEmail_shouldReturn400() throws Exception {
         String user = """
-                        {
-                          "login": "login",
-                          "name": "Name",
-                          "email": "",
-                          "birthday": "2000-10-20"
-                        }
-                """;
+        {
+        "login": "login",
+        "name": "Name",
+        "email": "",
+        "birthday": "2000-10-20"
+        }
+        """;
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -113,13 +113,13 @@ public class UserControllerMockTests {
     @Test
     public void addUserWithBlankEmail_shouldReturn400() throws Exception {
         String user = """
-                        {
-                          "login": "login",
-                          "name": "Name",
-                          "email": " ",
-                          "birthday": "2000-10-20"
-                        }
-                """;
+        {
+        "login": "login",
+        "name": "Name",
+        "email": " ",
+        "birthday": "2000-10-20"
+        }
+        """;
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -130,12 +130,12 @@ public class UserControllerMockTests {
     @Test
     public void addUserWithoutEmail_shouldReturn400() throws Exception {
         String user = """
-                        {
-                          "login": "login",
-                          "name": "Name",
-                          "birthday": "2000-10-20"
-                        }
-                """;
+        {
+        "login": "login",
+        "name": "Name",
+        "birthday": "2000-10-20"
+        }
+        """;
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -146,13 +146,13 @@ public class UserControllerMockTests {
     @Test
     public void addUserWithIncorrectEmail_shouldReturn400() throws Exception {
         String user = """
-                        {
-                          "login": "login",
-                          "name": "Name",
-                          "email": "mail",
-                          "birthday": "2000-10-20"
-                        }
-                """;
+        {
+        "login": "login",
+        "name": "Name",
+        "email": "mail",
+        "birthday": "2000-10-20"
+        }
+        """;
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -163,13 +163,13 @@ public class UserControllerMockTests {
     @Test
     public void addUserWithEmptyLogin_shouldReturn400() throws Exception {
         String user = """
-                        {
-                          "login": "",
-                          "name": "Name",
-                          "email": "mail@mail.ru",
-                          "birthday": "2000-10-20"
-                        }
-                """;
+        {
+        "login": "",
+        "name": "Name",
+        "email": "mail@mail.ru",
+        "birthday": "2000-10-20"
+        }
+        """;
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -180,13 +180,13 @@ public class UserControllerMockTests {
     @Test
     public void addUserWithBlankLogin_shouldReturn400() throws Exception {
         String user = """
-                        {
-                          "login": " ",
-                          "name": "Name",
-                          "email": "mail@mail.ru",
-                          "birthday": "2000-10-20"
-                        }
-                """;
+        {
+        "login": " ",
+        "name": "Name",
+        "email": "mail@mail.ru",
+        "birthday": "2000-10-20"
+        }
+        """;
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -197,13 +197,13 @@ public class UserControllerMockTests {
     @Test
     public void addUserWithLoginWithBlank_shouldReturn400() throws Exception {
         String user = """
-                        {
-                          "login": "us er",
-                          "name": "Name",
-                          "email": "mail@mail.ru",
-                          "birthday": "2000-10-20"
-                        }
-                """;
+        {
+        "login": "us er",
+        "name": "Name",
+        "email": "mail@mail.ru",
+        "birthday": "2000-10-20"
+        }
+        """;
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -214,12 +214,12 @@ public class UserControllerMockTests {
     @Test
     public void addUserWithoutLogin_shouldReturn400() throws Exception {
         String user = """
-                        {
-                          "name": "Name",
-                          "email": "mail@mail.ru",
-                          "birthday": "2000-10-20"
-                        }
-                """;
+        {
+        "name": "Name",
+        "email": "mail@mail.ru",
+        "birthday": "2000-10-20"
+        }
+        """;
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -230,13 +230,13 @@ public class UserControllerMockTests {
     @Test
     public void addUserWithIncorrectBirthday_shouldReturn400() throws Exception {
         String user = """
-                        {
-                          "login": "user",
-                          "name": "Name",
-                          "email": "mail@mail.ru",
-                          "birthday": "2030-10-20"
-                        }
-                """;
+        {
+        "login": "user",
+        "name": "Name",
+        "email": "mail@mail.ru",
+        "birthday": "2030-10-20"
+        }
+        """;
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -247,22 +247,22 @@ public class UserControllerMockTests {
     @Test
     public void updateUserIncorrectEmail_shouldReturn400() throws Exception {
         String user1 = """
-                        {
-                          "login": "login",
-                          "name": "Name",
-                          "email": "mail@mail.ru",
-                          "birthday": "2000-10-20"
-                        }
-                """;
+        {
+        "login": "login",
+        "name": "Name",
+        "email": "mail@mail.ru",
+        "birthday": "2000-10-20"
+        }
+        """;
         String user2 = """
-                        {
-                          "id": 1,
-                          "login": "",
-                          "name": "Name2",
-                          "email": "mail2",
-                          "birthday": "2000-11-21"
-                        }
-                """;
+        {
+        "id": 1,
+        "login": "",
+        "name": "Name2",
+        "email": "mail2",
+        "birthday": "2000-11-21"
+        }
+        """;
 
         mockMvc.perform(post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -277,22 +277,22 @@ public class UserControllerMockTests {
     @Test
     public void updateUserWithEmptyLogin_shouldReturn400() throws Exception {
         String user1 = """
-                        {
-                          "login": "login",
-                          "name": "Name",
-                          "email": "mail@mail.ru",
-                          "birthday": "2000-10-20"
-                        }
-                """;
+        {
+        "login": "login",
+        "name": "Name",
+        "email": "mail@mail.ru",
+        "birthday": "2000-10-20"
+        }
+        """;
         String user2 = """
-                        {
-                          "id": 1,
-                          "login": "",
-                          "name": "Name2",
-                          "email": "mail2@mail.ru",
-                          "birthday": "2000-11-21"
-                        }
-                """;
+        {
+          "id": 1,
+          "login": "",
+          "name": "Name2",
+          "email": "mail2@mail.ru",
+          "birthday": "2000-11-21"
+        }
+        """;
 
         mockMvc.perform(post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -307,22 +307,22 @@ public class UserControllerMockTests {
     @Test
     public void updateUserWithLoginWithBlank_shouldReturn400() throws Exception {
         String user1 = """
-                        {
-                          "login": "login",
-                          "name": "Name",
-                          "email": "mail@mail.ru",
-                          "birthday": "2000-10-20"
-                        }
-                """;
+        {
+          "login": "login",
+          "name": "Name",
+          "email": "mail@mail.ru",
+          "birthday": "2000-10-20"
+        }
+        """;
         String user2 = """
-                        {
-                          "id": 1,
-                          "login": "us er",
-                          "name": "Name2",
-                          "email": "mail2@mail.ru",
-                          "birthday": "2000-11-21"
-                        }
-                """;
+        {
+        "id": 1,
+        "login": "us er",
+        "name": "Name2",
+        "email": "mail2@mail.ru",
+        "birthday": "2000-11-21"
+        }
+        """;
 
         mockMvc.perform(post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -337,22 +337,22 @@ public class UserControllerMockTests {
     @Test
     public void updateUserWithIncorrectBirthday_shouldReturn400() throws Exception {
         String user1 = """
-                        {
-                          "login": "login",
-                          "name": "Name",
-                          "email": "mail@mail.ru",
-                          "birthday": "2000-10-20"
-                        }
-                """;
+        {
+        "login": "login",
+        "name": "Name",
+        "email": "mail@mail.ru",
+        "birthday": "2000-10-20"
+        }
+        """;
         String user2 = """
-                        {
-                          "id": 1,
-                          "login": "user",
-                          "name": "Name2",
-                          "email": "mail2@mail.ru",
-                          "birthday": "2030-11-21"
-                        }
-                """;
+        {
+        "id": 1,
+        "login": "user",
+        "name": "Name2",
+        "email": "mail2@mail.ru",
+        "birthday": "2030-11-21"
+        }
+        """;
 
         mockMvc.perform(post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
