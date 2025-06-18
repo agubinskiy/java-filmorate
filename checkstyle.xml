@@ -31,6 +31,8 @@
 		<module name="RegexpSinglelineJava">
 			<property name="format" value="^[ \t]*[{]"/>
 			<property name="ignoreComments" value="true"/>
+			<property name="ignorePattern"
+					  value="^ *String \w+ = &quot;&quot;&quot;.*\{|^ *\{.*&quot;&quot;&quot;.*"/>
 			<property name="message" value="Leading braces"/>
 		</module>
 
