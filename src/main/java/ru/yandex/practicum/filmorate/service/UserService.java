@@ -6,8 +6,10 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -55,7 +57,7 @@ public class UserService {
         userStorage.getUser(userId).get().getFriends().add(friendId); //добавляем друга в список друзей пользователя
         userStorage.getUser(friendId).get().getFriends().add(userId); //добавляем пользователя в список друзей друга
         log.info("Друг успешно добавлен.");
-        return userStorage.getUser(userId).get();
+        return userStorage.getUser(friendId).get();
     }
 
     public User deleteFriend(Long userId, Long friendId) {
@@ -73,7 +75,7 @@ public class UserService {
         return userStorage.getUser(userId).get();
     }
 
-    public Set<Long> getCommonFriends(Long userId1, Long userId2) {
+    public List<User> getCommonFriends(Long userId1, Long userId2) {
         if (userStorage.getUser(userId1).isEmpty()) {
             log.warn("Ошибка при поиске друзей. Пользователь с id={} не найден", userId1);
             throw new NotFoundException("Пользователь с id=" + userId1 + " не найден");
@@ -87,15 +89,23 @@ public class UserService {
         //оставляем только пересечения со списком друзей пользователя 2
         commonFriends.retainAll(userStorage.getUser(userId2).get().getFriends());
         log.info("Список общих друзей успешно получен");
-        return commonFriends;
+        return getListOfFriendsForId(commonFriends);
     }
 
-    public Set<Long> getFriends(Long userId) {
+    public List<User> getFriends(Long userId) {
         if (userStorage.getUser(userId).isEmpty()) {
             log.warn("Ошибка при запросе списка друзей. Пользователь с id={} не найден", userId);
             throw new NotFoundException("Пользователь с id=" + userId + " не найден");
         }
         log.info("Список друзей успешно получен");
-        return userStorage.getUser(userId).get().getFriends();
+        return getListOfFriendsForId(userStorage.getUser(userId).get().getFriends());
+    }
+
+    private List<User> getListOfFriendsForId(Set<Long> list) {
+        List<User> result = new ArrayList<>();
+        for (Long id : list) {
+            result.add(getUser(id));
+        }
+        return result;
     }
 }

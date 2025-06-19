@@ -16,7 +16,8 @@ import java.util.List;
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
-    private final Comparator<Film> filmLikesComparator = Comparator.comparingInt(film -> film.getLikes().size());
+    private final Comparator<Film> filmLikesComparator = Comparator.comparingInt((Film film) ->
+            film.getLikes().size()).reversed();
 
     public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
         this.filmStorage = filmStorage;
@@ -75,11 +76,10 @@ public class FilmService {
         return filmStorage.getFilm(filmId).get();
     }
 
-    public List<Long> getMostLikedFilms(int count) {
+    public List<Film> getMostLikedFilms(int count) {
         return filmStorage.findAllFilms().stream()
                 .sorted(filmLikesComparator)
                 .limit(count)
-                .map(Film::getId)
                 .toList();
     }
 }
