@@ -6,6 +6,11 @@ import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -15,11 +20,17 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class FilmControllerTest {
+    private FilmStorage filmStorage;
+    private UserStorage userStorage;
+    private FilmService filmService;
     private FilmController filmController;
 
     @BeforeEach
     public void beforeEach() {
-        filmController = new FilmController();
+        filmStorage = new InMemoryFilmStorage();
+        userStorage = new InMemoryUserStorage();
+        filmService = new FilmService(filmStorage, userStorage);
+        filmController = new FilmController(filmService);
     }
 
     @Test
@@ -33,9 +44,9 @@ public class FilmControllerTest {
                 .build();
         filmController.addFilm(film);
 
-        assertNotNull(filmController.getFilms());
-        assertEquals(1, filmController.getFilms().size());
-        assertEquals("Name", filmController.getFilms().get(1L).getName(),
+        assertNotNull(filmStorage.getFilms());
+        assertEquals(1, filmStorage.getFilms().size());
+        assertEquals("Name", filmStorage.getFilms().get(1L).getName(),
                 "Название фильма некорректно");
     }
 
@@ -58,9 +69,9 @@ public class FilmControllerTest {
         filmController.addFilm(film1);
         filmController.updateFilm(film2);
 
-        assertNotNull(filmController.getFilms());
-        assertEquals(1, filmController.getFilms().size());
-        assertEquals("Name2", filmController.getFilms().get(1L).getName(),
+        assertNotNull(filmStorage.getFilms());
+        assertEquals(1, filmStorage.getFilms().size());
+        assertEquals("Name2", filmStorage.getFilms().get(1L).getName(),
                 "Название фильма некорректно");
     }
 
@@ -86,7 +97,7 @@ public class FilmControllerTest {
 
         assertNotNull(result);
         assertEquals(2, result.size());
-        assertEquals(filmController.getFilms().values(), result,
+        assertEquals(filmStorage.getFilms().values(), result,
                 "Список фильмов некорректен");
     }
 
@@ -103,9 +114,9 @@ public class FilmControllerTest {
                 .build();
         filmController.addFilm(film);
 
-        assertNotNull(filmController.getFilms());
-        assertEquals(1, filmController.getFilms().size());
-        assertEquals("Name", filmController.getFilms().get(1L).getName(),
+        assertNotNull(filmStorage.getFilms());
+        assertEquals(1, filmStorage.getFilms().size());
+        assertEquals("Name", filmStorage.getFilms().get(1L).getName(),
                 "Название фильма некорректно");
     }
 
@@ -120,9 +131,9 @@ public class FilmControllerTest {
                 .build();
         filmController.addFilm(film);
 
-        assertNotNull(filmController.getFilms());
-        assertEquals(1, filmController.getFilms().size());
-        assertEquals("Name", filmController.getFilms().get(1L).getName(),
+        assertNotNull(filmStorage.getFilms());
+        assertEquals(1, filmStorage.getFilms().size());
+        assertEquals("Name", filmStorage.getFilms().get(1L).getName(),
                 "Название фильма некорректно");
     }
 
@@ -137,7 +148,8 @@ public class FilmControllerTest {
                 .build();
 
         ValidationException exception = assertThrows(ValidationException.class, () -> filmController.addFilm(film));
-        assertEquals("Дата релиза некорректна", exception.getMessage());
+        assertEquals("releaseDate", exception.getParameter());
+        assertEquals("Дата релиза не может быть до 28.12.1895", exception.getReason());
     }
 
     @Test
@@ -151,9 +163,9 @@ public class FilmControllerTest {
                 .build();
         filmController.addFilm(film);
 
-        assertNotNull(filmController.getFilms());
-        assertEquals(1, filmController.getFilms().size());
-        assertEquals("Name", filmController.getFilms().get(1L).getName(),
+        assertNotNull(filmStorage.getFilms());
+        assertEquals(1, filmStorage.getFilms().size());
+        assertEquals("Name", filmStorage.getFilms().get(1L).getName(),
                 "Название фильма некорректно");
     }
 
@@ -176,7 +188,8 @@ public class FilmControllerTest {
         filmController.addFilm(film1);
 
         ValidationException exception = assertThrows(ValidationException.class, () -> filmController.updateFilm(film2));
-        assertEquals("Дата релиза некорректна", exception.getMessage());
+        assertEquals("releaseDate", exception.getParameter());
+        assertEquals("Дата релиза не может быть до 28.12.1895", exception.getReason());
     }
 
     @Test

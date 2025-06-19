@@ -6,6 +6,9 @@ import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.exceptions.DuplicatedDataException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -16,10 +19,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class UserControllerTest {
     private UserController userController;
+    private UserStorage userStorage;
+    private UserService userService;
 
     @BeforeEach
     void beforeEach() {
-        userController = new UserController();
+        userStorage = new InMemoryUserStorage();
+        userService = new UserService(userStorage);
+        userController = new UserController(userService);
     }
 
 
@@ -34,9 +41,9 @@ public class UserControllerTest {
                 .build();
         userController.addUser(user);
 
-        assertNotNull(userController.getUsers());
-        assertEquals(1, userController.getUsers().size());
-        assertEquals("user", userController.getUsers().get(1L).getLogin(),
+        assertNotNull(userStorage.getUsers());
+        assertEquals(1, userStorage.getUsers().size());
+        assertEquals("user", userStorage.getUsers().get(1L).getLogin(),
                 "Логин пользователя некорректен");
     }
 
@@ -59,9 +66,9 @@ public class UserControllerTest {
         userController.addUser(user1);
         userController.updateUser(user2);
 
-        assertNotNull(userController.getUsers());
-        assertEquals(1, userController.getUsers().size());
-        assertEquals("user2", userController.getUsers().get(1L).getLogin(),
+        assertNotNull(userStorage.getUsers());
+        assertEquals(1, userStorage.getUsers().size());
+        assertEquals("user2", userStorage.getUsers().get(1L).getLogin(),
                 "Логин пользователя некорректен");
     }
 
@@ -87,7 +94,7 @@ public class UserControllerTest {
 
         assertNotNull(result);
         assertEquals(2, result.size());
-        assertEquals(userController.getUsers().values(), result,
+        assertEquals(userStorage.getUsers().values(), result,
                 "Список пользователей некорректен");
     }
 
