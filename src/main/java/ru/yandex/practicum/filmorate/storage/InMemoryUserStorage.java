@@ -1,7 +1,5 @@
 package ru.yandex.practicum.filmorate.storage;
 
-import jakarta.validation.Valid;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.DuplicatedDataException;
@@ -21,7 +19,9 @@ public class InMemoryUserStorage implements UserStorage {
     private long counter;
 
     @Override
-    public Collection<User> findAllUsers() {return users.values();}
+    public Collection<User> findAllUsers() {
+        return users.values();
+    }
 
     @Override
     public Optional<User> getUser(Long userId) {
