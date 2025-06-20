@@ -3,12 +3,13 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -16,8 +17,6 @@ import java.util.List;
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
-    private final Comparator<Film> filmLikesComparator = Comparator.comparingInt((Film film) ->
-            film.getLikes().size()).reversed();
 
     public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
         this.filmStorage = filmStorage;
@@ -33,19 +32,36 @@ public class FilmService {
     }
 
     public Film updateFilm(Film newFilm) {
-        return filmStorage.updateFilm(newFilm);
-    }
-
-    public void deleteFilm(Long id) {
-        filmStorage.deleteFilm(id);
+        Film oldFilm = filmStorage.getFilm(newFilm.getId()).orElseThrow(() -> {
+            log.warn("Ошибка при обновлении фильма. Не найдено фильма с идентификатором {}",
+                    newFilm.getId());
+            return new NotFoundException("Фильм с id = " + newFilm.getId() + " не найден");
+        });
+        if (newFilm.getName() != null) {
+            oldFilm.setName(newFilm.getName());
+        }
+        if (newFilm.getDescription() != null) {
+            oldFilm.setDescription(newFilm.getDescription());
+        }
+        if (newFilm.getReleaseDate() != null) {
+            if (newFilm.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
+                log.warn("Ошибка при обновлении фильма. Дата релиза не может быть до 28.12.1895. Передано: {}",
+                        newFilm.getReleaseDate());
+                throw new ValidationException("releaseDate", "Дата релиза не может быть до 28.12.1895");
+            }
+            oldFilm.setReleaseDate(newFilm.getReleaseDate());
+        }
+        if (newFilm.getDuration() != null) {
+            oldFilm.setDuration(newFilm.getDuration());
+        }
+        return filmStorage.updateFilm(oldFilm);
     }
 
     public Film getFilm(Long filmId) {
-        if (filmStorage.getFilm(filmId).isEmpty()) {
+        return filmStorage.getFilm(filmId).orElseThrow(() -> {
             log.warn("Ошибка при поиске фильма. Фильм с id={} не найден", filmId);
-            throw new NotFoundException("Фильм с id=" + filmId + " не найден");
-        }
-        return filmStorage.getFilm(filmId).get();
+            return new NotFoundException("Фильм с id=" + filmId + " не найден");
+        });
     }
 
     public Film addLike(Long filmId, Long userId) {
@@ -77,9 +93,6 @@ public class FilmService {
     }
 
     public List<Film> getMostLikedFilms(int count) {
-        return filmStorage.findAllFilms().stream()
-                .sorted(filmLikesComparator)
-                .limit(count)
-                .toList();
+        return filmStorage.getMostLikedFilms(count);
     }
 }

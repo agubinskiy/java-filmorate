@@ -26,11 +26,10 @@ public class UserService {
     }
 
     public User getUser(Long userId) {
-        if (userStorage.getUser(userId).isEmpty()) {
+        return userStorage.getUser(userId).orElseThrow(() -> {
             log.warn("Ошибка при поиске пользователя. Пользователь с id={} не найден", userId);
-            throw new NotFoundException("Пользователь с id=" + userId + " не найден");
-        }
-        return userStorage.getUser(userId).get();
+            return new NotFoundException("Пользователь с id=" + userId + " не найден");
+        });
     }
 
     public User addUser(User user) {
@@ -39,10 +38,6 @@ public class UserService {
 
     public User updateUser(User newUser) {
         return userStorage.updateUser(newUser);
-    }
-
-    public void deleteUser(Long id) {
-        userStorage.deleteUser(id);
     }
 
     public User addFriend(Long userId, Long friendId) {

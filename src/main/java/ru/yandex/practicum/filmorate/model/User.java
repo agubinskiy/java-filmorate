@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.model;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
@@ -18,19 +19,23 @@ import java.util.Set;
 @NoArgsConstructor
 @Builder
 public class User {
+    @NotNull(message = "Id не может быть пустым", groups = UpdateValidation.class)
     private Long id;
 
-    @Email
-    @NotBlank
+    @Email(message = "Некорректный формат почты",
+            groups = {CreateValidation.class, UpdateValidation.class})
+    @NotBlank(message = "Email не может быть пустым",
+            groups = {CreateValidation.class, UpdateValidation.class})
     private String email;
 
-    @NotBlank(message = "Логин не может быть пустым")
-    @Pattern(regexp = "^\\S+$", message = "Логин не должен содержать пробелов")
+    @NotBlank(message = "Логин не может быть пустым", groups = {CreateValidation.class, UpdateValidation.class})
+    @Pattern(regexp = "^\\S+$", message = "Логин не должен содержать пробелов",
+            groups = {CreateValidation.class, UpdateValidation.class})
     private String login;
 
     private String name;
 
-    @PastOrPresent(message = "Некорректная дата рождения")
+    @PastOrPresent(message = "Некорректная дата рождения", groups = {CreateValidation.class, UpdateValidation.class})
     private LocalDate birthday;
 
     private final Set<Long> friends = new HashSet<>();
