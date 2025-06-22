@@ -3,13 +3,25 @@ package ru.yandex.practicum.filmorate;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.controller.UserController;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import java.time.LocalDate;
+import java.util.List;
+
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UserController.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -18,45 +30,67 @@ public class UserControllerMockTests {
     @Autowired
     private MockMvc mockMvc;
 
+    @MockBean
+    private UserService userService;
+
     @Test
     public void addUser_shouldReturn200() throws Exception {
-        String user = "{\"login\":\"login\",\"name\":\"Name\",\"email\":\"mail@mail.ru\",\"birthday\":\"2000-10-20\"}";
+        String userJson = "{\"login\":\"login\",\"name\":\"Name\",\"email\":\"mail@mail.ru\",\"birthday\":" +
+                "\"2000-10-20\"}";
+
+        User expectedUser = new User(1L, "mail@mail.ru", "login", "Name",
+                LocalDate.of(2000, 10, 20));
+        when(userService.addUser(any(User.class))).thenReturn(expectedUser);
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(user))
-                .andExpect(status().isOk());
+                        .content(userJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.login").value("login"))
+                .andExpect(jsonPath("$.name").value("Name"))
+                .andExpect(jsonPath("$.email").value("mail@mail.ru"))
+                .andExpect(jsonPath("$.birthday").value("2000-10-20"));
     }
 
     @Test
     public void updateUser_shouldReturn200() throws Exception {
-        String user1 = "{\"login\":\"login\",\"name\":\"Name\",\"email\":\"mail@mail.ru\",\"birthday\":\"2000-10-20\"}";
-        String user2 = "{\"id\":1,\"login\":\"login2\",\"name\":\"Name2\",\"email\":\"mail2@mail.ru\",\"birthday\":" +
+        String userJson = "{\"id\":1,\"login\":\"login2\",\"name\":\"Name2\",\"email\":\"mail2@mail.ru\",\"birthday\":" +
                 "\"2000-11-21\"}";
 
-        mockMvc.perform(post("/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(user1));
+        User expectedUser = new User(1L, "mail2@mail.ru", "login2", "Name2",
+                LocalDate.of(2000, 11, 21));
+        when(userService.updateUser(any(User.class))).thenReturn(expectedUser);
 
         mockMvc.perform(put("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(user2))
-                .andExpect(status().isOk());
+                        .content(userJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.login").value("login2"))
+                .andExpect(jsonPath("$.name").value("Name2"))
+                .andExpect(jsonPath("$.email").value("mail2@mail.ru"))
+                .andExpect(jsonPath("$.birthday").value("2000-11-21"));
     }
 
     @Test
     public void getAllUsers_shouldReturn200() throws Exception {
-        String user = "{\"login\":\"login\",\"name\":\"Name\",\"email\":\"mail@mail.ru\",\"birthday\":\"2000-10-20\"}";
+        User user1 = new User(1L, "mail@mail.ru", "login", "Name",
+                LocalDate.of(2000, 10, 20));
+        User user2 = new User(1L, "mail2@mail.ru", "login2", "Name2",
+                LocalDate.of(2000, 11, 21));
 
-        mockMvc.perform(post("/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(user));
+        when(userService.findAllUsers()).thenReturn(List.of(user1, user2));
 
         mockMvc.perform(get("/users"))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].login").value("login"))
                 .andExpect(jsonPath("$[0].name").value("Name"))
-                .andExpect(jsonPath("$[0].email").value("mail@mail.ru"));
+                .andExpect(jsonPath("$[0].email").value("mail@mail.ru"))
+                .andExpect(jsonPath("$[0].birthday").value("2000-10-20"))
+                .andExpect(jsonPath("$[1].login").value("login2"))
+                .andExpect(jsonPath("$[1].name").value("Name2"))
+                .andExpect(jsonPath("$[1].email").value("mail2@mail.ru"))
+                .andExpect(jsonPath("$[1].birthday").value("2000-11-21"));
     }
 
     @Test
@@ -151,64 +185,45 @@ public class UserControllerMockTests {
 
     @Test
     public void updateUserIncorrectEmail_shouldReturn400() throws Exception {
-        String user1 = "{\"login\":\"login\",\"name\":\"Name\",\"email\":\"mail@mail.ru\",\"birthday\":\"2000-10-20\"}";
-        String user2 = "{\"id\":1,\"login\":\"\",\"name\":\"Name2\",\"email\":\"mail2\",\"birthday\":\"2000-11-21\"}";
+        String user = "{\"id\":1,\"login\":\"\",\"name\":\"Name2\",\"email\":\"mail2\",\"birthday\":\"2000-11-21\"}";
 
-        mockMvc.perform(post("/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(user1));
 
         mockMvc.perform(put("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(user2))
+                        .content(user))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     public void updateUserWithEmptyLogin_shouldReturn400() throws Exception {
-        String user1 = "{\"login\":\"login\",\"name\":\"Name\",\"email\":\"mail@mail.ru\",\"birthday\":\"2000-10-20\"}";
-        String user2 = "{\"id\":1,\"login\":\"\",\"name\":\"Name2\",\"email\":\"mail2@mail.ru\",\"birthday\":" +
+        String user = "{\"id\":1,\"login\":\"\",\"name\":\"Name2\",\"email\":\"mail2@mail.ru\",\"birthday\":" +
                 "\"2000-11-21\"}";
-
-        mockMvc.perform(post("/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(user1));
 
         mockMvc.perform(put("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(user2))
+                        .content(user))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     public void updateUserWithLoginWithBlank_shouldReturn400() throws Exception {
-        String user1 = "{\"login\":\"login\",\"name\":\"Name\",\"email\":\"mail@mail.ru\",\"birthday\":\"2000-10-20\"}";
-        String user2 = "{\"id\":1,\"login\":\"us er\",\"name\":\"Name2\",\"email\":\"mail2@mail.ru\",\"birthday\":" +
+        String user = "{\"id\":1,\"login\":\"us er\",\"name\":\"Name2\",\"email\":\"mail2@mail.ru\",\"birthday\":" +
                 "\"2000-11-21\"}";
-
-        mockMvc.perform(post("/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(user1));
 
         mockMvc.perform(put("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(user2))
+                        .content(user))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     public void updateUserWithIncorrectBirthday_shouldReturn400() throws Exception {
-        String user1 = "{\"login\":\"login\",\"name\":\"Name\",\"email\":\"mail@mail.ru\",\"birthday\":\"2000-10-20\"}";
-        String user2 = "{\"id\":1,\"login\":\"user\",\"name\":\"Name2\",\"email\":\"mail2@mail.ru\",\"birthday\":" +
+        String user = "{\"id\":1,\"login\":\"user\",\"name\":\"Name2\",\"email\":\"mail2@mail.ru\",\"birthday\":" +
                 "\"2030-11-21\"}";
-
-        mockMvc.perform(post("/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(user1));
 
         mockMvc.perform(put("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(user2))
+                        .content(user))
                 .andExpect(status().isBadRequest());
     }
 }
