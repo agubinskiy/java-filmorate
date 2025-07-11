@@ -34,7 +34,7 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User addUser(User user) {
         if (user.getName() == null) {
-            user.setName(user.getLogin());
+            user.setName(user.getLogin()); //если имя не указано, в качестве имени используем логин
         }
         checkEmailDuplicate(user.getEmail());
         checkLoginDuplicate(user.getLogin());
@@ -82,6 +82,7 @@ public class InMemoryUserStorage implements UserStorage {
         return users;
     }
 
+    //Проверка, что такой почты еще не зарегистрировано
     private void checkEmailDuplicate(String email) {
         if (emails.contains(email)) {
             log.warn("Ошибка при обновлении пользователя. Почта {} уже используется", email);
@@ -89,6 +90,7 @@ public class InMemoryUserStorage implements UserStorage {
         }
     }
 
+    //Проверка, что такого логина еще не зарегистрировано
     private void checkLoginDuplicate(String login) {
         if (logins.contains(login)) {
             log.warn("Ошибка при обновлении пользователя. Логин {} уже используется", login);

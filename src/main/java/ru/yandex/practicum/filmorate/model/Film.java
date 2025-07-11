@@ -35,5 +35,9 @@ public class Film {
             groups = {CreateValidation.class, UpdateValidation.class})
     private Integer duration;
 
+    private Genre genre;
+
+    private Rate rate;
+
     private final Set<Long> likes = new HashSet<>();
 }

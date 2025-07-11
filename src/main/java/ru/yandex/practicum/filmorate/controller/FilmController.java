@@ -50,13 +50,13 @@ public class FilmController {
 
     @PostMapping
     public Film addFilm(@Validated(CreateValidation.class) @RequestBody Film film) {
-        log.info("Добавляется фильм {}", film);
+        log.info("Добавляется фильм {}", film.getId());
         return filmService.addFilm(film);
     }
 
     @PutMapping
     public Film updateFilm(@Validated(UpdateValidation.class) @RequestBody Film newFilm) {
-        log.info("Обновляется фильм {}", newFilm);
+        log.info("Обновляется фильм {}", newFilm.getId());
         return filmService.updateFilm(newFilm);
     }
 

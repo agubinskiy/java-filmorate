@@ -55,13 +55,13 @@ public class UserController {
 
     @PostMapping
     public User addUser(@Validated(CreateValidation.class) @RequestBody User user) {
-        log.info("Добавляется пользователь {}", user);
+        log.info("Добавляется пользователь {}", user.getId());
         return userService.addUser(user);
     }
 
     @PutMapping
     public User updateUser(@Validated(UpdateValidation.class) @RequestBody User newUser) {
-        log.info("Обновляется пользователь {}", newUser);
+        log.info("Обновляется пользователь {}", newUser.getId());
         return userService.updateUser(newUser);
     }
 
