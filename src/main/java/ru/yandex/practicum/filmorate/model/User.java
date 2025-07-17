@@ -11,7 +11,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -38,5 +37,5 @@ public class User {
     @PastOrPresent(message = "Некорректная дата рождения", groups = {CreateValidation.class, UpdateValidation.class})
     private LocalDate birthday;
 
-    private final Set<Long> friends = new HashSet<>();
+    private Set<Long> friends;
 }
