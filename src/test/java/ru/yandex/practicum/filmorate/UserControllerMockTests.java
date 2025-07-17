@@ -96,7 +96,6 @@ public class UserControllerMockTests {
                 .andExpect(jsonPath("$[1].email").value("mail2@mail.ru"))
                 .andExpect(jsonPath("$[1].birthday").value("2000-11-21"));
     }
-    
 
     @Test
     public void addUserWithBlankEmail_shouldReturn400() throws Exception {
