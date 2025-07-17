@@ -1,25 +1,32 @@
 package ru.yandex.practicum.filmorate.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+import java.util.Arrays;
+
+@AllArgsConstructor
+@Getter
 public enum Genre {
-    COMEDY("Комедия"),
-    DRAMA("Драма"),
-    ANIMATION("Мультфильм"),
-    THRILLER("Триллер"),
-    DOCUMENTARY("Документальный"),
-    ACTION("Боевик");
+    COMEDY(1, "Комедия"),
+    DRAMA(2, "Драма"),
+    ANIMATION(3, "Мультфильм"),
+    THRILLER(4, "Триллер"),
+    DOCUMENTARY(5, "Документальный"),
+    ACTION(6, "Боевик");
 
+    private final int id;
     private final String displayName;
-
-    Genre(String displayName) {
-        this.displayName = displayName;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
 
     @Override
     public String toString() {
         return displayName;
+    }
+
+    public static Genre fromId(int id) {
+        return Arrays.stream(values())
+                .filter(genre -> genre.getId() == id)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Неизвестный id жанра: " + id));
     }
 }

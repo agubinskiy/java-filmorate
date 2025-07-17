@@ -11,9 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -39,5 +37,5 @@ public class User {
     @PastOrPresent(message = "Некорректная дата рождения", groups = {CreateValidation.class, UpdateValidation.class})
     private LocalDate birthday;
 
-    private final Map<Long, Boolean> friends = new HashMap<>();
+    private Set<Long> friends;
 }

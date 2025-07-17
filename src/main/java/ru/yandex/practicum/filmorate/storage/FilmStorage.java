@@ -4,7 +4,6 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public interface FilmStorage {
@@ -16,7 +15,7 @@ public interface FilmStorage {
 
     Film updateFilm(Film film);
 
-    Map<Long, Film> getFilms();
-
     List<Film> getMostLikedFilms(int count);
+
+    Film addLike(Long film_id, Long user_id);
 }

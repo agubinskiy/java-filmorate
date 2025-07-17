@@ -10,12 +10,13 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.yandex.practicum.filmorate.dto.NewUserRequest;
+import ru.yandex.practicum.filmorate.dto.UpdateUserRequest;
+import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.model.CreateValidation;
 import ru.yandex.practicum.filmorate.model.UpdateValidation;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.util.Collection;
 import java.util.List;
 
 @RestController
@@ -30,49 +31,49 @@ public class UserController {
     }
 
     @GetMapping
-    public Collection<User> findAllUsers() {
+    public List<UserDto> findAllUsers() {
         log.info("Запрошен список всех пользователей");
         return userService.findAllUsers();
     }
 
     @GetMapping("/{id}")
-    public User getUser(@PathVariable Long id) {
+    public UserDto getUser(@PathVariable Long id) {
         log.info("Запрошена информация по пользователю id={}", id);
         return userService.getUser(id);
     }
 
     @GetMapping("/{id}/friends")
-    public List<User> getFriends(@PathVariable Long id) {
+    public List<UserDto> getFriends(@PathVariable Long id) {
         log.info("Запрошен список друзей пользователя id={}", id);
         return userService.getFriends(id);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public List<User> getCommonFriend(@PathVariable Long id, @PathVariable Long otherId) {
+    public List<UserDto> getCommonFriend(@PathVariable Long id, @PathVariable Long otherId) {
         log.info("Запрошен список общих друзей пользователей id={} и {}", id, otherId);
         return userService.getCommonFriends(id, otherId);
     }
 
     @PostMapping
-    public User addUser(@Validated(CreateValidation.class) @RequestBody User user) {
-        log.info("Добавляется пользователь {}", user.getId());
-        return userService.addUser(user);
+    public UserDto addUser(@Validated(CreateValidation.class) @RequestBody NewUserRequest request) {
+        log.info("Добавляется пользователь");
+        return userService.addUser(request);
     }
 
     @PutMapping
-    public User updateUser(@Validated(UpdateValidation.class) @RequestBody User newUser) {
-        log.info("Обновляется пользователь {}", newUser.getId());
-        return userService.updateUser(newUser);
+    public UserDto updateUser(@Validated(UpdateValidation.class) @RequestBody UpdateUserRequest request) {
+        log.info("Обновляется пользователь {}", request.getId());
+        return userService.updateUser(request);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public User addFriend(@PathVariable Long id, @PathVariable Long friendId) {
+    public UserDto addFriend(@PathVariable Long id, @PathVariable Long friendId) {
         log.info("Добавляется друг id={} пользователю userId={}", friendId, id);
         return userService.addFriend(id, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public User deleteFriend(@PathVariable Long id, @PathVariable Long friendId) {
+    public UserDto deleteFriend(@PathVariable Long id, @PathVariable Long friendId) {
         log.info("Удаляется друг id={}  у пользователя userId={}", friendId, id);
         return userService.deleteFriend(id, friendId);
     }
