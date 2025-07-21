@@ -88,23 +88,27 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public List<User> getCommonFriends(Long user1Id, Long user2Id) {
+        User user1 = getUser(user1Id).orElseThrow();
+        User user2 = getUser(user2Id).orElseThrow();
         //копируем список друзей пользователя 1
-        Set<Long> commonFriends = new HashSet<>(getUser(user1Id).get().getFriends());
+        Set<Long> commonFriends = new HashSet<>(user1.getFriends());
         //оставляем только пересечения со списком друзей пользователя 2
-        commonFriends.retainAll(getUser(user2Id).get().getFriends());
+        commonFriends.retainAll(user2.getFriends());
         return getListOfFriendsForId(commonFriends);
     }
 
     @Override
     public User addFriend(Long userId, Long friendId) {
-        getUser(userId).get().getFriends().add(friendId);
-        return getUser(userId).get();
+        User user = getUser(userId).orElseThrow();
+        user.getFriends().add(friendId);
+        return user;
     }
 
     @Override
     public User deleteFriend(Long userId, Long friendId) {
-        getUser(userId).get().getFriends().remove(friendId);
-        return getUser(userId).get();
+        User user = getUser(userId).orElseThrow();
+        user.getFriends().remove(friendId);
+        return user;
     }
 
     //Проверка, что такой почты еще не зарегистрировано
@@ -126,7 +130,7 @@ public class InMemoryUserStorage implements UserStorage {
     private List<User> getListOfFriendsForId(Set<Long> list) {
         List<User> result = new ArrayList<>();
         for (Long id : list) {
-            result.add(getUser(id).get());
+            result.add(getUser(id).orElseThrow());
         }
         return result;
     }

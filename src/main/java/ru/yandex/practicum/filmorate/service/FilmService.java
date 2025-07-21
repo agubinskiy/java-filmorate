@@ -22,6 +22,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import static ru.yandex.practicum.filmorate.mapper.FilmMapper.mapToFilm;
+import static ru.yandex.practicum.filmorate.mapper.FilmMapper.mapToFilmDto;
+
 @Service
 @Slf4j
 public class FilmService {
@@ -44,7 +47,7 @@ public class FilmService {
     public FilmDto addFilm(@Valid NewFilmRequest request) {
         log.debug("Начинается добавление фильма по запросу {}", request);
         if (request.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            log.warn("Ошибка при добавлении фильма. Дата релиза не может быть до 28.12.1895. Передано: {}",
+            log.error("Ошибка при добавлении фильма. Дата релиза не может быть до 28.12.1895. Передано: {}",
                     request.getReleaseDate());
             throw new ValidationException("releaseDate", "Дата релиза не может быть до 28.12.1895");
         }
@@ -54,10 +57,11 @@ public class FilmService {
         if (request.getGenres() != null) {
             validateGenre(request.getGenres());
         }
-        Film film = FilmMapper.mapToFilm(request);
+        Film film = mapToFilm(request);
+        log.debug("Запрос на добавление фильма конвертирован в объект класса Film {}", film);
         film = filmStorage.addFilm(film);
-        log.debug("Добавление успешно {}", film);
-        return FilmMapper.mapToFilmDto(film);
+        log.debug("Добавление фильма успешно {}", film);
+        return mapToFilmDto(film);
     }
 
     public FilmDto updateFilm(UpdateFilmRequest request) {
@@ -75,9 +79,10 @@ public class FilmService {
                             request.getId());
                     return new NotFoundException("Фильм с id = " + request.getId() + " не найден");
                 });
+        log.debug("Запрос на обновление фильма конвертирован в объект класса Film {}", updatedFilm);
         updatedFilm = filmStorage.updateFilm(updatedFilm);
         log.debug("Обновление успешно {}", updatedFilm);
-        return FilmMapper.mapToFilmDto(updatedFilm);
+        return mapToFilmDto(updatedFilm);
     }
 
     public FilmDto getFilm(Long filmId) {
@@ -100,7 +105,7 @@ public class FilmService {
         }
         filmStorage.addLike(filmId, userId);
         log.info("Лайк успешно добавлен.");
-        return FilmMapper.mapToFilmDto(filmStorage.getFilm(filmId).get());
+        return mapToFilmDto(filmStorage.getFilm(filmId).get());
     }
 
     public FilmDto deleteLike(Long filmId, Long userId) {
@@ -114,7 +119,7 @@ public class FilmService {
         }
         filmStorage.getFilm(filmId).get().getLikes().remove(userId);
         log.info("Лайк успешно удалён.");
-        return FilmMapper.mapToFilmDto(filmStorage.getFilm(filmId).get());
+        return mapToFilmDto(filmStorage.getFilm(filmId).get());
     }
 
     public List<FilmDto> getMostLikedFilms(int count) {
@@ -125,7 +130,7 @@ public class FilmService {
 
     private void validateRate(RateDtoForFilm mpa) {
         if (mpa.getId() < 1 || mpa.getId() > 5) {
-            log.trace("Валидация рейтинга не пройдена. Рейтинг с идентификатором id={} не найден", mpa.getId());
+            log.debug("Валидация рейтинга не пройдена. Рейтинг с идентификатором id={} не найден", mpa.getId());
             throw new NotFoundException("Рейтинг с идентификатором id=" + mpa.getId() + " не существует");
         }
     }
@@ -133,7 +138,7 @@ public class FilmService {
     private void validateGenre(Set<GenreDtoForFilm> genres) {
         genres.forEach(genre -> {
             if (genre.getId() < 1 || genre.getId() > 6) {
-                log.trace("Валидация жанра не пройдена. Жанр с идентификатором id={} не найден", genre.getId());
+                log.debug("Валидация жанра не пройдена. Жанр с идентификатором id={} не найден", genre.getId());
                 throw new NotFoundException("Жанр с идентификатором id=" + genre.getId() + " не существует");
             }
         });

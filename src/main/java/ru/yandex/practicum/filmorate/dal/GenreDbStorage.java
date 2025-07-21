@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.dal;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.dal.mappers.GenreRowMapper;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
 
@@ -13,16 +14,17 @@ import java.util.Optional;
 public class GenreDbStorage extends BaseDbStorage<Genre> implements GenreStorage {
     private static final String FIND_ALL_QUERY = "SELECT * FROM Genres";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM Genres WHERE id = ?";
+    private static final RowMapper<Genre> mapper = new GenreRowMapper();
 
-    public GenreDbStorage(JdbcTemplate jdbc, RowMapper<Genre> mapper) {
-        super(jdbc, mapper);
+    public GenreDbStorage(JdbcTemplate jdbc) {
+        super(jdbc);
     }
 
     public List<Genre> findAllGenres() {
-        return findMany(FIND_ALL_QUERY);
+        return findMany(FIND_ALL_QUERY, mapper);
     }
 
     public Optional<Genre> getGenre(Integer id) {
-        return findOne(FIND_BY_ID_QUERY, id);
+        return findOne(FIND_BY_ID_QUERY, mapper, id);
     }
 }

@@ -14,6 +14,9 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.List;
 
+import static ru.yandex.practicum.filmorate.mapper.UserMapper.mapToUser;
+import static ru.yandex.practicum.filmorate.mapper.UserMapper.mapToUserDto;
+
 @Service
 @Slf4j
 public class UserService {
@@ -41,9 +44,11 @@ public class UserService {
 
     public UserDto addUser(NewUserRequest request) {
         log.debug("Начинается добавление пользователя по запросу {}", request);
-        User user = UserMapper.mapToUser(request);
+        User user = mapToUser(request);
+        log.debug("Запрос на добавление пользователя конвертирован в объект класса User {}", user);
         user = userStorage.addUser(user);
-        return UserMapper.mapToUserDto(user);
+        log.debug("Добавлен пользователь {}", user);
+        return mapToUserDto(user);
     }
 
     public UserDto updateUser(UpdateUserRequest request) {
@@ -54,8 +59,10 @@ public class UserService {
                     log.warn("Ошибка при обновлении пользователя. Пользователь с id={} не найден", request.getId());
                     return new NotFoundException("Пользователь с id=" + request.getId() + " не найден");
                 });
+        log.debug("Запрос на обновление пользователя конвертирован в объект класса User {}", updatedUser);
         updatedUser = userStorage.updateUser(updatedUser);
-        return UserMapper.mapToUserDto(updatedUser);
+        log.debug("Обновлён пользователь {}", updatedUser);
+        return mapToUserDto(updatedUser);
     }
 
     public UserDto addFriend(Long userId, Long friendId) {
@@ -67,8 +74,8 @@ public class UserService {
             log.warn("Ошибка при добавлении друга. Пользователь с id={} не найден", friendId);
             throw new NotFoundException("Пользователь с id=" + friendId + " не найден");
         }
-        log.info("Друг успешно добавлен.");
-        return UserMapper.mapToUserDto(userStorage.addFriend(userId, friendId));
+        log.info("Друг {} успешно добавлен пользователю {}.", friendId, userId);
+        return mapToUserDto(userStorage.addFriend(userId, friendId));
     }
 
     public UserDto deleteFriend(Long userId, Long friendId) {
@@ -80,8 +87,8 @@ public class UserService {
             log.warn("Ошибка при удалении друга. Пользователь с id={} не найден", friendId);
             throw new NotFoundException("Пользователь с id=" + friendId + " не найден");
         }
-        log.info("Друг успешно удалён.");
-        return UserMapper.mapToUserDto(userStorage.deleteFriend(userId, friendId));
+        log.info("Друг {} успешно удалён у пользователя {}.", friendId, userId);
+        return mapToUserDto(userStorage.deleteFriend(userId, friendId));
     }
 
     public List<UserDto> getCommonFriends(Long userId1, Long userId2) {
@@ -93,7 +100,7 @@ public class UserService {
             log.warn("Ошибка при поиске друзей. Пользователь с id={} не найден", userId2);
             throw new NotFoundException("Пользователь с id=" + userId2 + " не найден");
         }
-        log.info("Список общих друзей успешно получен");
+        log.info("Список общих друзей пользователей {} и {} успешно получен", userId1, userId2);
         return userStorage.getCommonFriends(userId1, userId2).stream()
                 .map(UserMapper::mapToUserDto)
                 .toList();
@@ -104,7 +111,7 @@ public class UserService {
             log.warn("Ошибка при запросе списка друзей. Пользователь с id={} не найден", userId);
             throw new NotFoundException("Пользователь с id=" + userId + " не найден");
         }
-        log.info("Список друзей успешно получен");
+        log.info("Список друзей пользователя {} успешно получен", userId);
         return userStorage.getFriends(userId).stream()
                 .map(UserMapper::mapToUserDto)
                 .toList();

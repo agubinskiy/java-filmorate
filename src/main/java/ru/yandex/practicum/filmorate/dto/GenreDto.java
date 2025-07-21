@@ -3,7 +3,9 @@ package ru.yandex.practicum.filmorate.dto;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
-//Формат жанра, который выводим в ответе
+/**
+ * Класс для описания формата жанра, который выводим в ответе
+ */
 @Data
 public class GenreDto {
     @NotBlank

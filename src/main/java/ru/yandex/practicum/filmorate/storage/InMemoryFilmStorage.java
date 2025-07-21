@@ -54,7 +54,8 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film addLike(Long filmId, Long userId) {
-        getFilm(filmId).get().getLikes().add(userId);
-        return getFilm(filmId).get();
+        Film film = getFilm(filmId).orElseThrow();
+        film.getLikes().add(userId);
+        return film;
     }
 }
