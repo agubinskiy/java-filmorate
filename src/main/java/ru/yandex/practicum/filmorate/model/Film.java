@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.model;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
@@ -10,7 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -35,5 +36,11 @@ public class Film {
             groups = {CreateValidation.class, UpdateValidation.class})
     private Integer duration;
 
-    private final Set<Long> likes = new HashSet<>();
+    private Rate mpa;
+
+    @NotEmpty(message = "Должен быть указан хотя бы один жанр",
+            groups = {CreateValidation.class, UpdateValidation.class})
+    private List<Genre> genres;
+
+    private Set<Long> likes;
 }
