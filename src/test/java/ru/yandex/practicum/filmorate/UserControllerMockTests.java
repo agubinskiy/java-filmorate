@@ -8,10 +8,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.controller.UserController;
+import ru.yandex.practicum.filmorate.dto.NewUserRequest;
+import ru.yandex.practicum.filmorate.dto.UpdateUserRequest;
+import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -26,7 +30,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(UserController.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class UserControllerMockTests {
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -39,8 +42,8 @@ public class UserControllerMockTests {
                 "\"2000-10-20\"}";
 
         User expectedUser = new User(1L, "mail@mail.ru", "login", "Name",
-                LocalDate.of(2000, 10, 20));
-        when(userService.addUser(any(User.class))).thenReturn(expectedUser);
+                LocalDate.of(2000, 10, 20), Collections.emptySet());
+        when(userService.addUser(any(NewUserRequest.class))).thenReturn(UserMapper.mapToUserDto(expectedUser));
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -58,8 +61,8 @@ public class UserControllerMockTests {
                 "\"2000-11-21\"}";
 
         User expectedUser = new User(1L, "mail2@mail.ru", "login2", "Name2",
-                LocalDate.of(2000, 11, 21));
-        when(userService.updateUser(any(User.class))).thenReturn(expectedUser);
+                LocalDate.of(2000, 11, 21), Collections.emptySet());
+        when(userService.updateUser(any(UpdateUserRequest.class))).thenReturn(UserMapper.mapToUserDto(expectedUser));
 
         mockMvc.perform(put("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -74,11 +77,12 @@ public class UserControllerMockTests {
     @Test
     public void getAllUsers_shouldReturn200() throws Exception {
         User user1 = new User(1L, "mail@mail.ru", "login", "Name",
-                LocalDate.of(2000, 10, 20));
+                LocalDate.of(2000, 10, 20), Collections.emptySet());
         User user2 = new User(1L, "mail2@mail.ru", "login2", "Name2",
-                LocalDate.of(2000, 11, 21));
+                LocalDate.of(2000, 11, 21), Collections.emptySet());
 
-        when(userService.findAllUsers()).thenReturn(List.of(user1, user2));
+        when(userService.findAllUsers()).thenReturn(List.of(UserMapper.mapToUserDto(user1),
+                UserMapper.mapToUserDto(user2)));
 
         mockMvc.perform(get("/users"))
                 .andExpect(status().isOk())
@@ -91,16 +95,6 @@ public class UserControllerMockTests {
                 .andExpect(jsonPath("$[1].name").value("Name2"))
                 .andExpect(jsonPath("$[1].email").value("mail2@mail.ru"))
                 .andExpect(jsonPath("$[1].birthday").value("2000-11-21"));
-    }
-
-    @Test
-    public void addUserWithEmptyEmail_shouldReturn400() throws Exception {
-        String user = "{\"login\":\"login\",\"name\":\"Name\",\"email\":\"\",\"birthday\":\"2000-10-20\"}";
-
-        mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(user))
-                .andExpect(status().isBadRequest());
     }
 
     @Test

@@ -2,13 +2,10 @@ package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.exceptions.DuplicatedDataException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -17,16 +14,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class UserControllerTest {
-    private UserController userController;
-    private UserStorage userStorage;
-    private UserService userService;
+public class InMemoryUserStorageTest {
+
+    private InMemoryUserStorage userStorage;
 
     @BeforeEach
     void beforeEach() {
         userStorage = new InMemoryUserStorage();
-        userService = new UserService(userStorage);
-        userController = new UserController(userService);
     }
 
 
@@ -39,7 +33,7 @@ public class UserControllerTest {
                 .name("Name")
                 .birthday(LocalDate.of(2000, 5, 10))
                 .build();
-        userController.addUser(user);
+        userStorage.addUser(user);
 
         assertNotNull(userStorage.getUsers());
         assertEquals(1, userStorage.getUsers().size());
@@ -63,8 +57,8 @@ public class UserControllerTest {
                 .name("Name2")
                 .birthday(LocalDate.of(2000, 2, 2))
                 .build();
-        userController.addUser(user1);
-        userController.updateUser(user2);
+        userStorage.addUser(user1);
+        userStorage.updateUser(user2);
 
         assertNotNull(userStorage.getUsers());
         assertEquals(1, userStorage.getUsers().size());
@@ -88,9 +82,9 @@ public class UserControllerTest {
                 .name("Name2")
                 .birthday(LocalDate.of(2000, 2, 2))
                 .build();
-        userController.addUser(user1);
-        userController.addUser(user2);
-        Collection<User> result = userController.findAllUsers();
+        userStorage.addUser(user1);
+        userStorage.addUser(user2);
+        Collection<User> result = userStorage.findAllUsers();
 
         assertNotNull(result);
         assertEquals(2, result.size());
@@ -114,9 +108,9 @@ public class UserControllerTest {
                 .name("Name2")
                 .birthday(LocalDate.of(2000, 2, 2))
                 .build();
-        userController.addUser(user1);
+        userStorage.addUser(user1);
 
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> userController.updateUser(user2));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> userStorage.updateUser(user2));
         assertEquals("Пользователь с id = 2 не найден", exception.getMessage());
     }
 
@@ -136,10 +130,10 @@ public class UserControllerTest {
                 .name("Name2")
                 .birthday(LocalDate.of(2000, 2, 2))
                 .build();
-        userController.addUser(user1);
+        userStorage.addUser(user1);
 
         DuplicatedDataException exception = assertThrows(DuplicatedDataException.class,
-                () -> userController.addUser(user2));
+                () -> userStorage.addUser(user2));
         assertEquals("Этот имейл уже используется", exception.getMessage());
     }
 
@@ -159,10 +153,10 @@ public class UserControllerTest {
                 .name("Name2")
                 .birthday(LocalDate.of(2000, 2, 2))
                 .build();
-        userController.addUser(user1);
+        userStorage.addUser(user1);
 
         DuplicatedDataException exception = assertThrows(DuplicatedDataException.class, () ->
-                userController.addUser(user2));
+                userStorage.addUser(user2));
         assertEquals("Этот логин уже используется", exception.getMessage());
     }
 
@@ -189,11 +183,11 @@ public class UserControllerTest {
                 .name("Name3")
                 .birthday(LocalDate.of(2000, 3, 3))
                 .build();
-        userController.addUser(user1);
-        userController.addUser(user2);
+        userStorage.addUser(user1);
+        userStorage.addUser(user2);
 
         DuplicatedDataException exception = assertThrows(DuplicatedDataException.class, () ->
-                userController.updateUser(user3));
+                userStorage.updateUser(user3));
         assertEquals("Этот имейл уже используется", exception.getMessage());
     }
 
@@ -220,11 +214,11 @@ public class UserControllerTest {
                 .name("Name3")
                 .birthday(LocalDate.of(2000, 3, 3))
                 .build();
-        userController.addUser(user1);
-        userController.addUser(user2);
+        userStorage.addUser(user1);
+        userStorage.addUser(user2);
 
         DuplicatedDataException exception = assertThrows(DuplicatedDataException.class, () ->
-                userController.updateUser(user3));
+                userStorage.updateUser(user3));
         assertEquals("Этот логин уже используется", exception.getMessage());
     }
 }

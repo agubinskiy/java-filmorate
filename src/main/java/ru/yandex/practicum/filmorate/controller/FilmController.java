@@ -11,8 +11,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.yandex.practicum.filmorate.dto.FilmDto;
+import ru.yandex.practicum.filmorate.dto.NewFilmRequest;
+import ru.yandex.practicum.filmorate.dto.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.model.CreateValidation;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.UpdateValidation;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -31,43 +33,43 @@ public class FilmController {
     }
 
     @GetMapping
-    public Collection<Film> findAllFilms() {
+    public Collection<FilmDto> findAllFilms() {
         log.info("Запрошен список всех фильмов");
         return filmService.findAllFilms();
     }
 
     @GetMapping("/{filmId}")
-    public Film getFilm(@PathVariable Long filmId) {
+    public FilmDto getFilm(@PathVariable Long filmId) {
         log.info("Запрошена информация по фильму id={}", filmId);
         return filmService.getFilm(filmId);
     }
 
     @GetMapping("/popular")
-    public List<Film> getMostLikedFilms(@RequestParam(defaultValue = "10") int count) {
+    public List<FilmDto> getMostLikedFilms(@RequestParam(defaultValue = "10") int count) {
         log.info("Запрошен список из {} самых популярных фильмов", count);
         return filmService.getMostLikedFilms(count);
     }
 
     @PostMapping
-    public Film addFilm(@Validated(CreateValidation.class) @RequestBody Film film) {
-        log.info("Добавляется фильм {}", film);
-        return filmService.addFilm(film);
+    public FilmDto addFilm(@Validated(CreateValidation.class) @RequestBody NewFilmRequest request) {
+        log.info("Добавляется фильм");
+        return filmService.addFilm(request);
     }
 
     @PutMapping
-    public Film updateFilm(@Validated(UpdateValidation.class) @RequestBody Film newFilm) {
-        log.info("Обновляется фильм {}", newFilm);
-        return filmService.updateFilm(newFilm);
+    public FilmDto updateFilm(@Validated(UpdateValidation.class) @RequestBody UpdateFilmRequest request) {
+        log.info("Обновляется фильм {}", request.getId());
+        return filmService.updateFilm(request);
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public Film addLike(@PathVariable Long id, @PathVariable Long userId) {
+    public FilmDto addLike(@PathVariable Long id, @PathVariable Long userId) {
         log.info("Добавляется лайк фильму id={} от пользователя userId={}", id, userId);
         return filmService.addLike(id, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
-    public Film deleteLike(@PathVariable Long id, @PathVariable Long userId) {
+    public FilmDto deleteLike(@PathVariable Long id, @PathVariable Long userId) {
         log.info("Удаляется лайк фильму id={} от пользователя userId={}", id, userId);
         return filmService.deleteLike(id, userId);
     }
