@@ -58,4 +58,9 @@ public class InMemoryFilmStorage implements FilmStorage {
         film.getLikes().add(userId);
         return film;
     }
+
+    @Override
+    public List<Film> getMostLikedFilmsByGenreYear(int count, long genreId, int year) {
+        return null;
+    }
 }

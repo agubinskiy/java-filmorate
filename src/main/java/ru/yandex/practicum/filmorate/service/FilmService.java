@@ -143,4 +143,10 @@ public class FilmService {
             }
         });
     }
+
+    public List<FilmDto> getMostLikedFilmsByGenreYear(int count, long genreId, int year) {
+        return filmStorage.getMostLikedFilmsByGenreYear(count, genreId, year).stream()
+                .map(FilmMapper::mapToFilmDto)
+                .toList();
+    }
 }
