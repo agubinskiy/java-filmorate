@@ -19,7 +19,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Repository("filmDboStorage")
+@Repository("filmDbStorage")
 public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
     private static final String FIND_ALL_QUERY = "SELECT * FROM Films";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM Films WHERE id = ?";
@@ -33,6 +33,9 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
             "duration = ?, rate_id = ? WHERE id = ?";
     private static final String DELETE_GENRE_QUERY = "DELETE FROM FilmGenres WHERE film_id = ?";
     private static final String INSERT_LIKE_QUERY = "INSERT INTO Likes(film_id, user_id) VALUES (?, ?)";
+    private static final String FIND_USERS_LIKES = "SELECT film_id FROM Likes WHERE user_id = ?";
+    private static final String FIND_COMMON_FILMS = "SELECT film_id FROM Likes WHERE user_id = ? INTERSECT " +
+            "SELECT film_id FROM Likes WHERE user_id = ?";
 
     public FilmDbStorage(JdbcTemplate jdbc) {
         super(jdbc);
@@ -101,6 +104,14 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
     public Film addLike(Long filmId, Long userId) {
         insert(INSERT_LIKE_QUERY, filmId, userId);
         return getFilm(filmId).orElseThrow();
+    }
+
+    public List<Long> getUserLikes(Long userId) {
+        return jdbc.queryForList(FIND_USERS_LIKES, Long.class, userId);
+    }
+
+    public List<Long> getCommonFilms(Long userId, Long friendId) {
+        return jdbc.queryForList(FIND_COMMON_FILMS, Long.class, userId, friendId);
     }
 
     private Map<Long, List<Genre>> findGenresForFilms() {

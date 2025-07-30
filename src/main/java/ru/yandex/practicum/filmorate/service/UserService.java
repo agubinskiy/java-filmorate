@@ -4,15 +4,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.dto.NewUserRequest;
 import ru.yandex.practicum.filmorate.dto.UpdateUserRequest;
 import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import static ru.yandex.practicum.filmorate.mapper.UserMapper.mapToUser;
 import static ru.yandex.practicum.filmorate.mapper.UserMapper.mapToUserDto;
@@ -20,11 +25,14 @@ import static ru.yandex.practicum.filmorate.mapper.UserMapper.mapToUserDto;
 @Service
 @Slf4j
 public class UserService {
+    private final FilmStorage filmStorage;
     private final UserStorage userStorage;
 
     @Autowired
-    public UserService(@Qualifier("userDboStorage") UserStorage userStorage) {
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage,
+                       @Qualifier("filmDbStorage") FilmStorage filmStorage) {
         this.userStorage = userStorage;
+        this.filmStorage = filmStorage;
     }
 
     public List<UserDto> findAllUsers() {
@@ -115,5 +123,41 @@ public class UserService {
         return userStorage.getFriends(userId).stream()
                 .map(UserMapper::mapToUserDto)
                 .toList();
+    }
+
+    public List<FilmDto> getRecommendations(Long userId) {
+        if (userStorage.getUser(userId).isEmpty()) {
+            log.warn("Ошибка при поиске рекомендаций. Пользователь с id={} не найден", userId);
+            throw new NotFoundException("Пользователь с id=" + userId + " не найден");
+        }
+        log.debug("Начинается поиск рекомендаций фильмов для пользователя Id={}", userId);
+        int max = 0; //Размер самого большого пересечения лайков
+        long resultId = 0; //Id пользователя с самым большим пересечением лайков
+        for(User friend: userStorage.findAllUsers()) {
+            log.debug("Поиск совпадений лайков с пользователем id={}", friend);
+            if(!Objects.equals(friend.getId(), userId)) { //исключаем пересечение пользователя с самим собой
+                int sizeOfCommonFilms = filmStorage.getCommonFilms(userId, friend.getId()).size();
+                if(sizeOfCommonFilms > max) {
+                    max = sizeOfCommonFilms;
+                    resultId = friend.getId();
+                }
+                log.debug("max={}, resultId={}", max, resultId);
+            }
+        }
+        //Если нашелся хотя бы один пользователь с похожими лайками
+        if(resultId > 0) {
+            log.debug("Максимальное совпадение лайков с пользователем id={}, начинается подготовка списке рекомендаций",
+                    resultId);
+            List<Long> recommendedFilms = filmStorage.getUserLikes(resultId); //Берем список лайков найденного пользователя
+            recommendedFilms.removeAll(filmStorage.getCommonFilms(resultId, userId));//Удаляем пересечения
+            log.debug("Список рекомендаций {}", recommendedFilms);
+            return recommendedFilms.stream()
+                    .map(id -> filmStorage.getFilm(id).orElseThrow())
+                    .map(FilmMapper::mapToFilmDto)
+                    .toList();
+        }
+        log.debug("Список рекомендаций пуст");
+        //Если нет пользователей с похожими лайками, возвращаем пустой список рекомендаций
+        return Collections.emptyList();
     }
 }

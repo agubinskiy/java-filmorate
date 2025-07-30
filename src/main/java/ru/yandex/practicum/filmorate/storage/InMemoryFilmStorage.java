@@ -5,12 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -57,5 +53,22 @@ public class InMemoryFilmStorage implements FilmStorage {
         Film film = getFilm(filmId).orElseThrow();
         film.getLikes().add(userId);
         return film;
+    }
+
+    @Override
+    public List<Long> getUserLikes(Long userId) {
+        return films.entrySet().stream()
+                .filter(entry -> entry.getValue().getLikes().contains(userId))
+                .map(Map.Entry::getKey)
+                .toList();
+    }
+
+    @Override
+    public List<Long> getCommonFilms(Long userId, Long friendId) {
+        //копируем список фильмов пользователя
+        List<Long> commonFilms = new ArrayList<>(getUserLikes(userId));
+        //оставляем только пересечения со списком фильмов друга
+        commonFilms.retainAll(getUserLikes(friendId));
+        return commonFilms;
     }
 }
