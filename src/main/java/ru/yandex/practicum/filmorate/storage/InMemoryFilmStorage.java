@@ -58,10 +58,10 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Map<Long, Map<Long, Double>> getAllLikes() {
         Map<Long, Map<Long, Double>> result = new HashMap<>();
-        for(Film film: films.values()) {
+        for (Film film : films.values()) {
             Set<Long> likes = film.getLikes();
-            if(likes != null) {
-                for(Long userId: likes) {
+            if (likes != null) {
+                for (Long userId : likes) {
                     result.computeIfAbsent(userId, k -> new HashMap<>()).put(film.getId(), 1.0);
                 }
             }

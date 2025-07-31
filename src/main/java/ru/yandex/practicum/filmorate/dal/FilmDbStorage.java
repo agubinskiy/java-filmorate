@@ -107,7 +107,7 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
     }
 
     /**
-     Сохраняем лайки всех пользователей в формате <userId, <filmId, rate>>
+     * Сохраняем лайки всех пользователей в формате <userId, <filmId, rate>>
      */
     public Map<Long, Map<Long, Double>> getAllLikes() {
         String query = "SELECT * FROM Likes";

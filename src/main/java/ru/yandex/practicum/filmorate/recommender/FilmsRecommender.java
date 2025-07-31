@@ -29,17 +29,17 @@ public class FilmsRecommender {
 
     private void build(Map<Long, Map<Long, Double>> data) {
         //Заполняем матрицы разностей и частот
-        for(Map<Long, Double> user: data.values()) {
+        for (Map<Long, Double> user : data.values()) {
             for (Entry<Long, Double> e : user.entrySet()) {
                 //Если значения для фильма еще нет, то добавляем его
                 Long filmId1 = e.getKey();
-                    diff.computeIfAbsent(filmId1, k -> new HashMap<>());
-                    freq.computeIfAbsent(filmId1, k -> new HashMap<>());
+                diff.computeIfAbsent(filmId1, k -> new HashMap<>());
+                freq.computeIfAbsent(filmId1, k -> new HashMap<>());
 
                 //Проходим по всем фильмам. Если есть оценка - увеличиваем число оценок и общий рейтинг
                 for (Entry<Long, Double> e2 : user.entrySet()) {
                     Long filmId2 = e2.getKey();
-                    if(filmId2.equals(filmId1)) continue;
+                    if (filmId2.equals(filmId1)) continue;
 
                     double observedDiff = e.getValue() - e2.getValue();
                     freq.get(filmId1).merge(filmId2, 1, Integer::sum);
@@ -83,11 +83,11 @@ public class FilmsRecommender {
             }
         }
 
-            Map<Long, Double> result = new HashMap<>();
-            for (Long j : predictions.keySet()) {
-                    result.put(j, predictions.get(j) / frequencies.get(j));
-            }
-
-            return result;
+        Map<Long, Double> result = new HashMap<>();
+        for (Long j : predictions.keySet()) {
+            result.put(j, predictions.get(j) / frequencies.get(j));
         }
+
+        return result;
+    }
 }
