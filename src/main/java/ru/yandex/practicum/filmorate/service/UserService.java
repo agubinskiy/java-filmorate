@@ -12,11 +12,13 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.recommender.FilmsRecommender;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static ru.yandex.practicum.filmorate.mapper.UserMapper.mapToUser;
@@ -131,33 +133,14 @@ public class UserService {
             throw new NotFoundException("Пользователь с id=" + userId + " не найден");
         }
         log.debug("Начинается поиск рекомендаций фильмов для пользователя Id={}", userId);
-        int max = 0; //Размер самого большого пересечения лайков
-        long resultId = 0; //Id пользователя с самым большим пересечением лайков
-        for(User friend: userStorage.findAllUsers()) {
-            log.debug("Поиск совпадений лайков с пользователем id={}", friend);
-            if(!Objects.equals(friend.getId(), userId)) { //исключаем пересечение пользователя с самим собой
-                int sizeOfCommonFilms = filmStorage.getCommonFilms(userId, friend.getId()).size();
-                if(sizeOfCommonFilms > max) {
-                    max = sizeOfCommonFilms;
-                    resultId = friend.getId();
-                }
-                log.debug("max={}, resultId={}", max, resultId);
-            }
-        }
-        //Если нашелся хотя бы один пользователь с похожими лайками
-        if(resultId > 0) {
-            log.debug("Максимальное совпадение лайков с пользователем id={}, начинается подготовка списке рекомендаций",
-                    resultId);
-            List<Long> recommendedFilms = filmStorage.getUserLikes(resultId); //Берем список лайков найденного пользователя
-            recommendedFilms.removeAll(filmStorage.getCommonFilms(resultId, userId));//Удаляем пересечения
-            log.debug("Список рекомендаций {}", recommendedFilms);
-            return recommendedFilms.stream()
-                    .map(id -> filmStorage.getFilm(id).orElseThrow())
-                    .map(FilmMapper::mapToFilmDto)
-                    .toList();
-        }
-        log.debug("Список рекомендаций пуст");
-        //Если нет пользователей с похожими лайками, возвращаем пустой список рекомендаций
-        return Collections.emptyList();
+        //Получаем данные по всем лайкам всех пользователей
+        Map<Long, Map<Long, Double>> allLikes = filmStorage.getAllLikes();
+        //По данным создаем объект для рекомендации фильмов
+        FilmsRecommender fr = new FilmsRecommender(allLikes);
+        //Ищем рекомендации для определенного пользователя
+        return fr.getRecommendation(userId).stream()
+                .map(id -> filmStorage.getFilm(id).orElseThrow())
+                .map(FilmMapper::mapToFilmDto)
+                .toList();
     }
 }

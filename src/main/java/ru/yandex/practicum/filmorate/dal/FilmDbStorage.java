@@ -106,8 +106,19 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
         return getFilm(filmId).orElseThrow();
     }
 
-    public List<Long> getUserLikes(Long userId) {
-        return jdbc.queryForList(FIND_USERS_LIKES, Long.class, userId);
+    /**
+     Сохраняем лайки всех пользователей в формате <userId, <filmId, rate>>
+     */
+    public Map<Long, Map<Long, Double>> getAllLikes() {
+        String query = "SELECT * FROM Likes";
+        Map<Long, Map<Long, Double>> result = new HashMap<>();
+        jdbc.query(query, rs -> {
+            Long filmId = rs.getLong("film_id");
+            Long userId = rs.getLong("user_id");
+            //Пока используем только лайки, поэтому рейтинг проставляем 1.0
+            result.computeIfAbsent(userId, k -> new HashMap<>()).put(filmId, 1.0);
+        });
+        return result;
     }
 
     public List<Long> getCommonFilms(Long userId, Long friendId) {
