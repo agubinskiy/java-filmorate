@@ -5,19 +5,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dto.FilmDto;
-import ru.yandex.practicum.filmorate.dto.GenreDtoForFilm;
-import ru.yandex.practicum.filmorate.dto.NewFilmRequest;
-import ru.yandex.practicum.filmorate.dto.RateDtoForFilm;
-import ru.yandex.practicum.filmorate.dto.UpdateFilmRequest;
+import ru.yandex.practicum.filmorate.dto.*;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.EventStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -30,12 +31,15 @@ import static ru.yandex.practicum.filmorate.mapper.FilmMapper.mapToFilmDto;
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
+    private final EventStorage eventStorage;
 
     @Autowired
     public FilmService(@Qualifier("filmDboStorage") FilmStorage filmStorage,
-                       @Qualifier("userDboStorage") UserStorage userStorage) {
+                       @Qualifier("userDboStorage") UserStorage userStorage,
+                       EventStorage eventStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
+        this.eventStorage = eventStorage;
     }
 
     public Collection<FilmDto> findAllFilms() {
@@ -105,6 +109,14 @@ public class FilmService {
         }
         filmStorage.addLike(filmId, userId);
         log.info("Лайк успешно добавлен.");
+        //добавить событие в ленту
+        eventStorage.addEvent(Event.builder()
+                .userId(userId)
+                .eventType(EventType.LIKE)
+                .operation(OperationType.ADD)
+                .timestamp(Instant.now().getEpochSecond())
+                .entityId(filmId)
+                .build());
         return mapToFilmDto(filmStorage.getFilm(filmId).get());
     }
 
@@ -119,6 +131,14 @@ public class FilmService {
         }
         filmStorage.getFilm(filmId).get().getLikes().remove(userId);
         log.info("Лайк успешно удалён.");
+        //добавить событие в ленту
+        eventStorage.addEvent(Event.builder()
+                .userId(userId)
+                .eventType(EventType.LIKE)
+                .operation(OperationType.REMOVE)
+                .timestamp(Instant.now().getEpochSecond())
+                .entityId(filmId)
+                .build());
         return mapToFilmDto(filmStorage.getFilm(filmId).get());
     }
 
