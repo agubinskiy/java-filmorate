@@ -6,11 +6,11 @@ import lombok.Data;
 @Data
 public class EventDTO {
     @NotBlank
-    private long eventId;
+    private String eventId;
     @NotBlank
-    private long entityId;
+    private String entityId;
     @NotBlank
-    private long userId;
+    private String userId;
     @NotBlank
     private EventType eventType;
     @NotBlank

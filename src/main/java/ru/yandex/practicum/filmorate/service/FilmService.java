@@ -112,7 +112,7 @@ public class FilmService {
                 .userId(userId)
                 .eventType(EventType.LIKE)
                 .operation(OperationType.ADD)
-                .timestamp(Instant.now().getEpochSecond())
+                .timestamp(Instant.now().toEpochMilli())
                 .entityId(filmId)
                 .build());
         return mapToFilmDto(filmStorage.getFilm(filmId).get());
@@ -134,7 +134,7 @@ public class FilmService {
                 .userId(userId)
                 .eventType(EventType.LIKE)
                 .operation(OperationType.REMOVE)
-                .timestamp(Instant.now().getEpochSecond())
+                .timestamp(Instant.now().toEpochMilli())
                 .entityId(filmId)
                 .build());
         return mapToFilmDto(filmStorage.getFilm(filmId).get());

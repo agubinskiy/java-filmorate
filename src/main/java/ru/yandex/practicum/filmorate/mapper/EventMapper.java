@@ -9,12 +9,12 @@ import ru.yandex.practicum.filmorate.model.Event;
 public final class EventMapper {
     public static EventDTO mspToEventDto(Event event) {
         EventDTO dto = new EventDTO();
-        dto.setEntityId(event.getEntityId());
-        dto.setUserId(event.getUserId());
+        dto.setEntityId(String.valueOf(event.getEntityId()));
+        dto.setUserId(String.valueOf(event.getUserId()));
         dto.setEventType(event.getEventType());
         dto.setOperation(event.getOperation());
         dto.setTimestamp(event.getTimestamp());
-        dto.setEventId(event.getId());
+        dto.setEventId(String.valueOf(event.getId()));
 
         return dto;
     }

@@ -84,7 +84,7 @@ public class UserService {
                 .userId(userId)
                 .eventType(EventType.FRIEND)
                 .operation(OperationType.ADD)
-                .timestamp(Instant.now().getEpochSecond())
+                .timestamp(Instant.now().toEpochMilli())
                 .entityId(friendId)
                 .build());
         return mapToUserDto(userStorage.addFriend(userId, friendId));
@@ -105,7 +105,7 @@ public class UserService {
                 .userId(userId)
                 .eventType(EventType.FRIEND)
                 .operation(OperationType.REMOVE)
-                .timestamp(Instant.now().getEpochSecond())
+                .timestamp(Instant.now().toEpochMilli())
                 .entityId(friendId)
                 .build());
         return mapToUserDto(userStorage.deleteFriend(userId, friendId));
