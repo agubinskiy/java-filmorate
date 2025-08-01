@@ -77,7 +77,7 @@ public class ReviewsService {
         return reviewStorage.getFilmReviews(count, filmId);
     }
 
-    public void addLike(Long reviewId, Long userId, int IsPositive) {
+    public void addLike(Long reviewId, Long userId, int isPositive) {
         if (reviewStorage.findReviewById(reviewId).isEmpty()) {
             log.warn("Ошибка при лайке отзыва. Отзыв с id={} не найден", reviewId);
             throw new NotFoundException("Отзыв с id=" + reviewId + " не найден.");
@@ -87,7 +87,7 @@ public class ReviewsService {
             throw new NotFoundException("Пользователь с id=" + userId + " не найден");
         }
         reviewStorage.deleteLike(reviewId, userId);
-        reviewStorage.addLike(IsPositive, reviewId, userId);
+        reviewStorage.addLike(isPositive, reviewId, userId);
     }
 
     public void deleteLike(Long reviewId, Long userId) {

@@ -75,8 +75,8 @@ public class ReviewsDbStorage {
         return jdbcTemplate.query(GET_REVIEWBYFILM_QUERY, mapper, filmId, count);
     }
 
-    public void addLike(int IsPositive, Long reviewId, Long userId) {
-        jdbcTemplate.update(ADD_LIKE_QUERY, IsPositive, userId, reviewId);
+    public void addLike(int isPositive, Long reviewId, Long userId) {
+        jdbcTemplate.update(ADD_LIKE_QUERY, isPositive, userId, reviewId);
         jdbcTemplate.update(UPDATE_USEFUL_QUERY, reviewId, reviewId);
     }
 
