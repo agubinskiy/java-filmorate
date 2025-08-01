@@ -32,6 +32,7 @@ public class UserDbStorage extends BaseDbStorage<User> implements UserStorage {
             "birthday = ? WHERE id = ?";
     private static final String INSERT_FRIEND_QUERY = "INSERT INTO FriendShip(user_id, friend_id) VALUES (?, ?)";
     private static final String DELETE_FRIEND_QUERY = "DELETE FROM FriendShip WHERE user_id = ? AND friend_id = ?";
+    private static final String GET_USER_FEED = "SELECT * FROM Events WHERE user_id = ?";
 
     public UserDbStorage(JdbcTemplate jdbc) {
         super(jdbc);
@@ -112,6 +113,11 @@ public class UserDbStorage extends BaseDbStorage<User> implements UserStorage {
         );
         return getUser(userId).orElseThrow();
     }
+
+  /*  public List<Event> getFeed(Long userId) {
+        RowMapper<Event> mapper = new EventRowMapper();
+        return findMany(GET_USER_FEED, mapper, userId);
+    }*/
 
     private Map<Long, Set<Long>> findFriends(Collection<Long> userIds) {
         String query = "SELECT * FROM FriendShip WHERE user_id IN (" +
