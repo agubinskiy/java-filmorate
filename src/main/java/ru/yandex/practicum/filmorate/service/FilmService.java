@@ -143,4 +143,24 @@ public class FilmService {
             }
         });
     }
+
+    public List<FilmDto> getMostLikedFilmsByGenreYear(int count, long genreId, int year) {
+        if (genreId > 0 && year > 0) {
+            return filmStorage.getMostLikedFilmsByGenreYear(count, genreId, year).stream()
+                    .map(FilmMapper::mapToFilmDto)
+                    .toList();
+        } else if (genreId > 0) {
+            return filmStorage.getMostLikedFilmsByGenre(count, genreId).stream()
+                    .map(FilmMapper::mapToFilmDto)
+                    .toList();
+        } else if (year > 0) {
+            return filmStorage.getMostLikedFilmsByYear(count, year).stream()
+                    .map(FilmMapper::mapToFilmDto)
+                    .toList();
+        } else {
+            return filmStorage.getMostLikedFilms(count).stream()
+                    .map(FilmMapper::mapToFilmDto)
+                    .toList();
+        }
+    }
 }
