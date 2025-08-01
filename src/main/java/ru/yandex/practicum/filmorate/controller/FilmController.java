@@ -43,13 +43,13 @@ public class FilmController {
         log.info("Запрошена информация по фильму id={}", filmId);
         return filmService.getFilm(filmId);
     }
-    /*
-    @GetMapping("/popular")
+
+    /*@GetMapping("/popular")
     public List<FilmDto> getMostLikedFilms(@RequestParam(defaultValue = "10") int count) {
         log.info("Запрошен список из {} самых популярных фильмов", count);
         return filmService.getMostLikedFilms(count);
-    }
-    */
+    }*/
+
     @PostMapping
     public FilmDto addFilm(@Validated(CreateValidation.class) @RequestBody NewFilmRequest request) {
         log.info("Добавляется фильм");
