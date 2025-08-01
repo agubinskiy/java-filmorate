@@ -7,9 +7,7 @@ import ru.yandex.practicum.filmorate.model.Event;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+
 
 public class EventRowMapper implements RowMapper<Event> {
     @Override

@@ -3,8 +3,6 @@ package ru.yandex.practicum.filmorate.dto;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
-import java.sql.Timestamp;
-
 @Data
 public class EventDTO {
     @NotBlank
