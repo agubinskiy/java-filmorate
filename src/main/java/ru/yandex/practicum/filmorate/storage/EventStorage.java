@@ -6,5 +6,6 @@ import java.util.List;
 
 public interface EventStorage {
     Event addEvent(Event event);
+
     List<Event> getFeed(Long userId);
 }
