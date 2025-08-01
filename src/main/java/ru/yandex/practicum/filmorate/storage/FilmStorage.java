@@ -20,4 +20,8 @@ public interface FilmStorage {
     Film addLike(Long filmId, Long userId);
 
     List<Film> getMostLikedFilmsByGenreYear(int count, long genreId, int year);
+
+    List<Film> getMostLikedFilmsByGenre(int count, long genreId);
+
+    List<Film> getMostLikedFilmsByYear(int count, int year);
 }
