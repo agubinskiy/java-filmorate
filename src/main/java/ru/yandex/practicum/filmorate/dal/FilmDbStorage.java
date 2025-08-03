@@ -38,7 +38,6 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
             "duration = ?, rate_id = ? WHERE id = ?";
     private static final String DELETE_GENRE_QUERY = "DELETE FROM FilmGenres WHERE film_id = ?";
     private static final String INSERT_LIKE_QUERY = "INSERT INTO Likes(film_id, user_id) VALUES (?, ?)";
-    private static final String DELETE_FILM_LIKES = "DELETE FROM Likes WHERE film_id = ?";
     private static final String DELETE_FILM_QUERY = "DELETE FROM Films WHERE id = ?";
 
     public FilmDbStorage(JdbcTemplate jdbc) {
@@ -112,14 +111,6 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
 
     @Transactional
     public void deleteFilm(Long filmId) {
-        delete(
-                DELETE_GENRE_QUERY,
-                filmId
-        );
-        delete(
-                DELETE_FILM_LIKES,
-                filmId
-        );
         delete(
                 DELETE_FILM_QUERY,
                 filmId

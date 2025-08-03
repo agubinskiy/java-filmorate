@@ -34,9 +34,6 @@ public class UserDbStorage extends BaseDbStorage<User> implements UserStorage {
     private static final String INSERT_FRIEND_QUERY = "INSERT INTO FriendShip(user_id, friend_id) VALUES (?, ?)";
     private static final String DELETE_FRIEND_QUERY = "DELETE FROM FriendShip WHERE user_id = ? AND friend_id = ?";
     private static final String DELETE_USER_QUERY = "DELETE FROM Users WHERE id = ?";
-    private static final String DELETE_USER_FRIENDSHIP = "DELETE FROM FriendShip WHERE user_id = ?";
-    private static final String DELETE_USER_AS_FRIEND = "DELETE FROM FriendShip WHERE friend_id = ?";
-    private static final String DELETE_USER_LIKES = "DELETE FROM Likes WHERE user_id = ?";
 
     public UserDbStorage(JdbcTemplate jdbc) {
         super(jdbc);
@@ -120,19 +117,6 @@ public class UserDbStorage extends BaseDbStorage<User> implements UserStorage {
 
     @Transactional
     public void deleteUser(Long id) {
-        delete(
-                DELETE_USER_FRIENDSHIP,
-                id
-        );
-        delete(
-                DELETE_USER_AS_FRIEND,
-                id
-        );
-        delete(
-                DELETE_USER_LIKES,
-                id
-        );
-        //maybe we should delete user reviews
         delete(
                 DELETE_USER_QUERY,
                 id
