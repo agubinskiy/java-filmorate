@@ -143,4 +143,13 @@ public class FilmService {
             }
         });
     }
+
+    public void deleteFilm(Long filmId) {
+        if (filmStorage.getFilm(filmId).isEmpty()) {
+            log.warn("Ошибка при удалении фильма. Фильм с id={} не найден", filmId);
+            throw new NotFoundException("Фильм с id=" + filmId + " не найден");
+        }
+        filmStorage.deleteFilm(filmId);
+        log.info("Фильм с id={} успешно удален", filmId);
+    }
 }

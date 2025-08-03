@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.dal;
 
+import jakarta.transaction.Transactional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -23,8 +24,12 @@ import java.util.stream.Collectors;
 public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
     private static final String FIND_ALL_QUERY = "SELECT * FROM Films";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM Films WHERE id = ?";
+    // private static final String FIND_MOST_LIKED_QUERY =
+    //        "SELECT f.*, count(l.user_id) as likes_count FROM Films f JOIN Likes l ON f.id = l.film_id " +
+    //                "GROUP BY f.id ORDER BY likes_count DESC LIMIT ?";
     private static final String FIND_MOST_LIKED_QUERY =
-            "SELECT f.*, count(l.user_id) as likes_count FROM Films f JOIN Likes l ON f.id = l.film_id " +
+            "SELECT f.*, COUNT(l.user_id) AS likes_count FROM Films f " +
+                    "LEFT JOIN Likes l ON f.id = l.film_id " +
                     "GROUP BY f.id ORDER BY likes_count DESC LIMIT ?";
     private static final String INSERT_FILM_QUERY = "INSERT INTO Films(name, description, release_date, duration, " +
             "rate_id) VALUES(?, ?, ?, ?, ?)";
@@ -33,6 +38,8 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
             "duration = ?, rate_id = ? WHERE id = ?";
     private static final String DELETE_GENRE_QUERY = "DELETE FROM FilmGenres WHERE film_id = ?";
     private static final String INSERT_LIKE_QUERY = "INSERT INTO Likes(film_id, user_id) VALUES (?, ?)";
+    private static final String DELETE_FILM_LIKES = "DELETE FROM Likes WHERE film_id = ?";
+    private static final String DELETE_FILM_QUERY = "DELETE FROM Films WHERE id = ?";
 
     public FilmDbStorage(JdbcTemplate jdbc) {
         super(jdbc);
@@ -101,6 +108,22 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
     public Film addLike(Long filmId, Long userId) {
         insert(INSERT_LIKE_QUERY, filmId, userId);
         return getFilm(filmId).orElseThrow();
+    }
+
+    @Transactional
+    public void deleteFilm(Long filmId) {
+        delete(
+                DELETE_GENRE_QUERY,
+                filmId
+        );
+        delete(
+                DELETE_FILM_LIKES,
+                filmId
+        );
+        delete(
+                DELETE_FILM_QUERY,
+                filmId
+        );
     }
 
     private Map<Long, List<Genre>> findGenresForFilms() {
