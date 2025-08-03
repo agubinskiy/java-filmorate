@@ -8,9 +8,9 @@ public class EventDTO {
     @NotBlank
     private String eventId;
     @NotBlank
-    private String entityId;
+    private long entityId;
     @NotBlank
-    private String userId;
+    private long userId;
     @NotBlank
     private EventType eventType;
     @NotBlank
