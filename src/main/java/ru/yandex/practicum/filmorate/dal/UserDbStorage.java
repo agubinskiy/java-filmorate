@@ -132,7 +132,7 @@ public class UserDbStorage extends BaseDbStorage<User> implements UserStorage {
                 DELETE_USER_LIKES,
                 id
         );
-        // maybe we should delete user reviews
+        //maybe we should delete user reviews
         delete(
                 DELETE_USER_QUERY,
                 id
