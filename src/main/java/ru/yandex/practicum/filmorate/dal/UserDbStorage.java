@@ -33,6 +33,7 @@ public class UserDbStorage extends BaseDbStorage<User> implements UserStorage {
             "birthday = ? WHERE id = ?";
     private static final String INSERT_FRIEND_QUERY = "INSERT INTO FriendShip(user_id, friend_id) VALUES (?, ?)";
     private static final String DELETE_FRIEND_QUERY = "DELETE FROM FriendShip WHERE user_id = ? AND friend_id = ?";
+    private static final String GET_USER_FEED = "SELECT * FROM Events WHERE user_id = ?";
     private static final String DELETE_USER_QUERY = "DELETE FROM Users WHERE id = ?";
 
     public UserDbStorage(JdbcTemplate jdbc) {

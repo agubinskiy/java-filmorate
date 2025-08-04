@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.yandex.practicum.filmorate.dto.EventDTO;
 import ru.yandex.practicum.filmorate.dto.NewUserRequest;
 import ru.yandex.practicum.filmorate.dto.UpdateUserRequest;
 import ru.yandex.practicum.filmorate.dto.UserDto;
@@ -76,6 +77,12 @@ public class UserController {
     public UserDto deleteFriend(@PathVariable Long id, @PathVariable Long friendId) {
         log.info("Удаляется друг id={}  у пользователя userId={}", friendId, id);
         return userService.deleteFriend(id, friendId);
+    }
+
+    @GetMapping("/{id}/feed")
+    public List<EventDTO> getFeed(@PathVariable Long id) {
+        log.info("Запрошена лента событий по пользователю с id={}", id);
+        return userService.getFeed(id);
     }
 
     @DeleteMapping("/{id}")

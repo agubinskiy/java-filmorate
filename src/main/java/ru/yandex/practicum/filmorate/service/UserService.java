@@ -4,14 +4,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dto.NewUserRequest;
-import ru.yandex.practicum.filmorate.dto.UpdateUserRequest;
-import ru.yandex.practicum.filmorate.dto.UserDto;
+import ru.yandex.practicum.filmorate.dto.*;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.mapper.EventMapper;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.EventStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.Comparator;
 import java.util.List;
 
 import static ru.yandex.practicum.filmorate.mapper.UserMapper.mapToUser;
@@ -21,10 +25,12 @@ import static ru.yandex.practicum.filmorate.mapper.UserMapper.mapToUserDto;
 @Slf4j
 public class UserService {
     private final UserStorage userStorage;
+    private final EventStorage eventStorage;
 
     @Autowired
-    public UserService(@Qualifier("userDboStorage") UserStorage userStorage) {
+    public UserService(@Qualifier("userDboStorage") UserStorage userStorage, EventStorage eventStorage) {
         this.userStorage = userStorage;
+        this.eventStorage = eventStorage;
     }
 
     public List<UserDto> findAllUsers() {
@@ -75,6 +81,14 @@ public class UserService {
             throw new NotFoundException("Пользователь с id=" + friendId + " не найден");
         }
         log.info("Друг {} успешно добавлен пользователю {}.", friendId, userId);
+        // отправить событие в ленту
+        eventStorage.addEvent(Event.builder()
+                .userId(userId)
+                .eventType(EventType.FRIEND)
+                .operation(OperationType.ADD)
+                .timestamp(Timestamp.from(Instant.now()))
+                .entityId(friendId)
+                .build());
         return mapToUserDto(userStorage.addFriend(userId, friendId));
     }
 
@@ -88,6 +102,14 @@ public class UserService {
             throw new NotFoundException("Пользователь с id=" + friendId + " не найден");
         }
         log.info("Друг {} успешно удалён у пользователя {}.", friendId, userId);
+        //отправить событие в ленту
+        eventStorage.addEvent(Event.builder()
+                .userId(userId)
+                .eventType(EventType.FRIEND)
+                .operation(OperationType.REMOVE)
+                .timestamp(Timestamp.from(Instant.now()))
+                .entityId(friendId)
+                .build());
         return mapToUserDto(userStorage.deleteFriend(userId, friendId));
     }
 
@@ -114,6 +136,18 @@ public class UserService {
         log.info("Список друзей пользователя {} успешно получен", userId);
         return userStorage.getFriends(userId).stream()
                 .map(UserMapper::mapToUserDto)
+                .toList();
+    }
+
+    public List<EventDTO> getFeed(Long userId) {
+        if (userStorage.getUser(userId).isEmpty()) {
+            log.warn("Ошибка при запросе ленты пользователя. Пользователь с id={} не найден", userId);
+            throw new NotFoundException("Пользователь с id=" + userId + " не найден");
+        }
+        log.info("Лента пользователя {} успешно получена", userId);
+        return eventStorage.getFeed(userId).stream()
+                .map(EventMapper::mspToEventDto)
+                .sorted(Comparator.comparingLong(EventDTO::getTimestamp))
                 .toList();
     }
 
