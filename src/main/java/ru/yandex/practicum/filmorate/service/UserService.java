@@ -7,9 +7,12 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.*;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.EventMapper;
+import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.recommender.FilmsRecommender;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.EventStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -17,6 +20,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import static ru.yandex.practicum.filmorate.mapper.UserMapper.mapToUser;
 import static ru.yandex.practicum.filmorate.mapper.UserMapper.mapToUserDto;
@@ -24,13 +28,16 @@ import static ru.yandex.practicum.filmorate.mapper.UserMapper.mapToUserDto;
 @Service
 @Slf4j
 public class UserService {
+    private final FilmStorage filmStorage;
     private final UserStorage userStorage;
     private final EventStorage eventStorage;
 
     @Autowired
-    public UserService(@Qualifier("userDboStorage") UserStorage userStorage, EventStorage eventStorage) {
+    public UserService(@Qualifier("userDboStorage") UserStorage userStorage, @Qualifier("filmDbStorage") FilmStorage filmStorage,
+                       EventStorage eventStorage) {
         this.userStorage = userStorage;
         this.eventStorage = eventStorage;
+        this.filmStorage = filmStorage;
     }
 
     public List<UserDto> findAllUsers() {
@@ -158,5 +165,22 @@ public class UserService {
         }
         log.info("Пользователь {} успешно удалён.", id);
         userStorage.deleteUser(id);
+    }
+
+    public List<FilmDto> getRecommendations(Long userId) {
+        if (userStorage.getUser(userId).isEmpty()) {
+            log.warn("Ошибка при поиске рекомендаций. Пользователь с id={} не найден", userId);
+            throw new NotFoundException("Пользователь с id=" + userId + " не найден");
+        }
+        log.debug("Начинается поиск рекомендаций фильмов для пользователя Id={}", userId);
+        //Получаем данные по всем лайкам всех пользователей
+        Map<Long, Map<Long, Double>> allLikes = filmStorage.getAllLikes();
+        //По данным создаем объект для рекомендации фильмов
+        FilmsRecommender fr = new FilmsRecommender(allLikes);
+        //Ищем рекомендации для определенного пользователя
+        return fr.getRecommendation(userId).stream()
+                .map(id -> filmStorage.getFilm(id).orElseThrow())
+                .map(FilmMapper::mapToFilmDto)
+                .toList();
     }
 }

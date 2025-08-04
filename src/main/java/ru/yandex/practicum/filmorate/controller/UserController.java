@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.dto.EventDTO;
+import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.dto.NewUserRequest;
 import ru.yandex.practicum.filmorate.dto.UpdateUserRequest;
 import ru.yandex.practicum.filmorate.dto.UserDto;
@@ -53,6 +54,12 @@ public class UserController {
     public List<UserDto> getCommonFriend(@PathVariable Long id, @PathVariable Long otherId) {
         log.info("Запрошен список общих друзей пользователей id={} и {}", id, otherId);
         return userService.getCommonFriends(id, otherId);
+    }
+
+    @GetMapping("/{id}/recommendations")
+    public List<FilmDto> getRecommendations(@PathVariable Long id) {
+        log.info("Запрошен список рекомендаций пользователя id={}", id);
+        return userService.getRecommendations(id);
     }
 
     @PostMapping

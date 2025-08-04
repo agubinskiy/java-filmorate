@@ -18,7 +18,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Repository("userDboStorage")
+@Repository("userDbStorage")
 public class UserDbStorage extends BaseDbStorage<User> implements UserStorage {
     private static final String FIND_ALL_QUERY = "SELECT * FROM Users ORDER BY id ASC";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM Users WHERE id = ?";
