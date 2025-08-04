@@ -148,4 +148,13 @@ public class UserService {
                 .toList();
 
     }
+
+    public void deleteUser(Long id) {
+        if (userStorage.getUser(id).isEmpty()) {
+            log.warn("Ошибка при запросе удаления пользователя. Пользователь с id={} не найден", id);
+            throw new NotFoundException("Пользователь с id=" + id + " не найден");
+        }
+        log.info("Пользователь {} успешно удалён.", id);
+        userStorage.deleteUser(id);
+    }
 }

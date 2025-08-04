@@ -23,5 +23,5 @@ public interface UserStorage {
 
     User deleteFriend(Long userId, Long friendId);
 
-  //  List<Event> getFeed(Long userId);
+    void deleteUser(Long id);
 }

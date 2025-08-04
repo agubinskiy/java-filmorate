@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.dal;
 
+import jakarta.transaction.Transactional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -33,6 +34,7 @@ public class UserDbStorage extends BaseDbStorage<User> implements UserStorage {
     private static final String INSERT_FRIEND_QUERY = "INSERT INTO FriendShip(user_id, friend_id) VALUES (?, ?)";
     private static final String DELETE_FRIEND_QUERY = "DELETE FROM FriendShip WHERE user_id = ? AND friend_id = ?";
     private static final String GET_USER_FEED = "SELECT * FROM Events WHERE user_id = ?";
+    private static final String DELETE_USER_QUERY = "DELETE FROM Users WHERE id = ?";
 
     public UserDbStorage(JdbcTemplate jdbc) {
         super(jdbc);
@@ -114,10 +116,13 @@ public class UserDbStorage extends BaseDbStorage<User> implements UserStorage {
         return getUser(userId).orElseThrow();
     }
 
-  /*  public List<Event> getFeed(Long userId) {
-        RowMapper<Event> mapper = new EventRowMapper();
-        return findMany(GET_USER_FEED, mapper, userId);
-    }*/
+    @Transactional
+    public void deleteUser(Long id) {
+        delete(
+                DELETE_USER_QUERY,
+                id
+        );
+    }
 
     private Map<Long, Set<Long>> findFriends(Collection<Long> userIds) {
         String query = "SELECT * FROM FriendShip WHERE user_id IN (" +

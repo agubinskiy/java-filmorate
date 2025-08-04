@@ -84,4 +84,11 @@ public class UserController {
         log.info("Запрошена лента событий по пользователю с id={}", id);
         return userService.getFeed(id);
     }
+
+    @DeleteMapping("/{id}")
+    public void deleteUser(@PathVariable Long id) {
+        log.info("Удаляется пользователь id={} ", id);
+        userService.deleteUser(id);
+        log.info("Пользователь с  id={} удален", id);
+    }
 }
