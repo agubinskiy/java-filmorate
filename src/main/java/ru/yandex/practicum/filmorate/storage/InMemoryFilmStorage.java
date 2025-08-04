@@ -60,6 +60,11 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+    public void deleteFilm(Long filmId) {
+
+    }
+
+    @Override
     public List<Film> getMostLikedFilmsByGenreYear(int count, long genreId, int year) {
         return null;
     }
