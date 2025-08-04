@@ -5,18 +5,27 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+
 import ru.yandex.practicum.filmorate.comparator.FilmComparatorDate;
 import ru.yandex.practicum.filmorate.comparator.FilmComparatorLikes;
+
 import ru.yandex.practicum.filmorate.dto.*;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.DirectorMapper;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
+
 import ru.yandex.practicum.filmorate.model.Director;
+
+import ru.yandex.practicum.filmorate.model.Event;
+
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.EventStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -29,18 +38,23 @@ import static ru.yandex.practicum.filmorate.mapper.FilmMapper.mapToFilmDto;
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
+
     private final DirectorService directorService;
 
     private final FilmComparatorLikes filmComparatorLikes = new FilmComparatorLikes();
     private final FilmComparatorDate filmComparatorDate = new FilmComparatorDate();
 
+    private final EventStorage eventStorage;
+
     @Autowired
     public FilmService(DirectorService directorService,
                        @Qualifier("filmDboStorage") FilmStorage filmStorage,
-                       @Qualifier("userDboStorage") UserStorage userStorage) {
+                       @Qualifier("userDboStorage") UserStorage userStorage,
+                       EventStorage eventStorage) {
         this.directorService = directorService;
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
+        this.eventStorage = eventStorage;
     }
 
     public Collection<FilmDto> findAllFilms() {
@@ -152,6 +166,14 @@ public class FilmService {
         }
         filmStorage.addLike(filmId, userId);
         log.info("Лайк успешно добавлен.");
+        //добавить событие в ленту
+        eventStorage.addEvent(Event.builder()
+                .userId(userId)
+                .eventType(EventType.LIKE)
+                .operation(OperationType.ADD)
+                .timestamp(Timestamp.from(Instant.now()))
+                .entityId(filmId)
+                .build());
         return mapToFilmDto(filmStorage.getFilm(filmId).get());
     }
 
@@ -166,6 +188,14 @@ public class FilmService {
         }
         filmStorage.getFilm(filmId).get().getLikes().remove(userId);
         log.info("Лайк успешно удалён.");
+        //добавить событие в ленту
+        eventStorage.addEvent(Event.builder()
+                .userId(userId)
+                .eventType(EventType.LIKE)
+                .operation(OperationType.REMOVE)
+                .timestamp(Timestamp.from(Instant.now()))
+                .entityId(filmId)
+                .build());
         return mapToFilmDto(filmStorage.getFilm(filmId).get());
     }
 
@@ -264,5 +294,14 @@ public class FilmService {
                     .map(FilmMapper::mapToFilmDto)
                     .toList();
         }
+    }
+
+    public void deleteFilm(Long filmId) {
+        if (filmStorage.getFilm(filmId).isEmpty()) {
+            log.warn("Ошибка при удалении фильма. Фильм с id={} не найден", filmId);
+            throw new NotFoundException("Фильм с id=" + filmId + " не найден");
+        }
+        filmStorage.deleteFilm(filmId);
+        log.info("Фильм с id={} успешно удален", filmId);
     }
 }

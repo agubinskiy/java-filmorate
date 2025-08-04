@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.dal;
 
+import jakarta.transaction.Transactional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -20,12 +21,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Repository("filmDboStorage")
+@Repository("filmDbStorage")
 public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
     private static final String FIND_ALL_QUERY = "SELECT * FROM Films";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM Films WHERE id = ?";
     private static final String FIND_MOST_LIKED_QUERY =
-            "SELECT f.*, count(l.user_id) as likes_count FROM Films f JOIN Likes l ON f.id = l.film_id " +
+            "SELECT f.*, COUNT(l.user_id) AS likes_count FROM Films f " +
+                    "LEFT JOIN Likes l ON f.id = l.film_id " +
                     "GROUP BY f.id ORDER BY likes_count DESC LIMIT ?";
     private static final String INSERT_FILM_QUERY = "INSERT INTO Films(name, description, release_date, duration, " +
             "rate_id) VALUES(?, ?, ?, ?, ?)";
@@ -34,6 +36,10 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
             "duration = ?, rate_id = ? WHERE id = ?";
     private static final String DELETE_GENRE_QUERY = "DELETE FROM FilmGenres WHERE film_id = ?";
     private static final String INSERT_LIKE_QUERY = "INSERT INTO Likes(film_id, user_id) VALUES (?, ?)";
+    private static final String FIND_USERS_LIKES = "SELECT film_id FROM Likes WHERE user_id = ?";
+    private static final String FIND_COMMON_FILMS = "SELECT film_id FROM Likes WHERE user_id = ? INTERSECT " +
+            "SELECT film_id FROM Likes WHERE user_id = ?";
+    private static final String DELETE_FILM_QUERY = "DELETE FROM Films WHERE id = ?";
     private static final String FIND_MOST_LIKED_BY_GENRE_YEAR_QUERY =
             "SELECT f.*, count(l.user_id) as likes_count FROM Films f JOIN Likes l ON f.id = l.film_id " +
                     "WHERE exists (select 1 from FilmGenres where film_id = f.id and genre_id = ?)" +
@@ -179,6 +185,33 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
     public Film addLike(Long filmId, Long userId) {
         insert(INSERT_LIKE_QUERY, filmId, userId);
         return getFilm(filmId).orElseThrow();
+    }
+
+    @Transactional
+    public void deleteFilm(Long filmId) {
+        delete(
+                DELETE_FILM_QUERY,
+                filmId
+        );
+    }
+
+    /**
+     * Сохраняем лайки всех пользователей в формате <userId, <filmId, rate>>
+     */
+    public Map<Long, Map<Long, Double>> getAllLikes() {
+        String query = "SELECT * FROM Likes";
+        Map<Long, Map<Long, Double>> result = new HashMap<>();
+        jdbc.query(query, rs -> {
+            Long filmId = rs.getLong("film_id");
+            Long userId = rs.getLong("user_id");
+            //Пока используем только лайки, поэтому рейтинг проставляем 1.0
+            result.computeIfAbsent(userId, k -> new HashMap<>()).put(filmId, 1.0);
+        });
+        return result;
+    }
+
+    public List<Long> getCommonFilms(Long userId, Long friendId) {
+        return jdbc.queryForList(FIND_COMMON_FILMS, Long.class, userId, friendId);
     }
 
     private Map<Long, List<Genre>> findGenresForFilms() {

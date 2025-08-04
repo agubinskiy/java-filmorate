@@ -111,6 +111,11 @@ public class InMemoryUserStorage implements UserStorage {
         return user;
     }
 
+    @Override
+    public void deleteUser(Long id) {
+
+    }
+
     //Проверка, что такой почты еще не зарегистрировано
     private void checkEmailDuplicate(String email) {
         if (emails.contains(email)) {

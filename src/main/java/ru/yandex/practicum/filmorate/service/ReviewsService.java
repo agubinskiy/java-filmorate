@@ -5,12 +5,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dal.EventDBStorage;
 import ru.yandex.practicum.filmorate.dal.ReviewsDbStorage;
+import ru.yandex.practicum.filmorate.dto.EventType;
+import ru.yandex.practicum.filmorate.dto.OperationType;
 import ru.yandex.practicum.filmorate.dto.ReviewDto;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,14 +27,17 @@ public class ReviewsService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
     private final ReviewsDbStorage reviewStorage;
+    private final EventDBStorage eventStorage;
 
     @Autowired
     public ReviewsService(@Qualifier("filmDboStorage") FilmStorage filmStorage,
                           @Qualifier("userDboStorage") UserStorage userStorage,
-                          @Qualifier("reviewsDbStorage") ReviewsDbStorage reviewStorage) {
+                          @Qualifier("reviewsDbStorage") ReviewsDbStorage reviewStorage,
+                          @Qualifier("eventDBStorage")EventDBStorage eventStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
         this.reviewStorage = reviewStorage;
+        this.eventStorage = eventStorage;
     }
 
     public ReviewDto addReview(@Valid ReviewDto review) {
@@ -40,7 +49,15 @@ public class ReviewsService {
             log.warn("Ошибка при добавлении отзыва. Фильм с id={} не найден", review.getFilmId());
             throw new NotFoundException("Фильм с id=" + review.getFilmId() + " не найден");
         }
-        return reviewStorage.addReview(review);
+        ReviewDto newReview = reviewStorage.addReview(review);
+        eventStorage.addEvent(Event.builder()
+                .userId(review.getUserId())
+                .eventType(EventType.REVIEW)
+                .operation(OperationType.ADD)
+                .timestamp(Timestamp.from(Instant.now()))
+                .entityId(newReview.getReviewId())
+                .build());
+        return newReview;
     }
 
     public ReviewDto updateReview(@Valid ReviewDto review) {
@@ -52,6 +69,13 @@ public class ReviewsService {
             log.warn("Ошибка при обновлении отзыва. Фильм с id={} не найден", review.getFilmId());
             throw new NotFoundException("Фильм с id=" + review.getFilmId() + " не найден");
         }
+        eventStorage.addEvent(Event.builder()
+                .userId(review.getUserId())
+                .eventType(EventType.REVIEW)
+                .operation(OperationType.UPDATE)
+                .timestamp(Timestamp.from(Instant.now()))
+                .entityId(review.getReviewId())
+                .build());
         return reviewStorage.updateReview(review);
     }
 
@@ -65,6 +89,13 @@ public class ReviewsService {
 
     public void deleteReview(Long reviewId) {
         if (reviewStorage.findReviewById(reviewId).isPresent()) {
+            eventStorage.addEvent(Event.builder()
+                    .userId(reviewStorage.findReviewById(reviewId).get().getUserId())
+                    .eventType(EventType.REVIEW)
+                    .operation(OperationType.REMOVE)
+                    .timestamp(Timestamp.from(Instant.now()))
+                    .entityId(reviewId)
+                    .build());
             reviewStorage.deleteReview(reviewId);
         } else {
             log.warn("Ошибка при удалении отзыва. Отзыв с id={} не найден", reviewId);
@@ -88,6 +119,13 @@ public class ReviewsService {
         }
         reviewStorage.deleteLike(reviewId, userId);
         reviewStorage.addLike(isPositive, reviewId, userId);
+        eventStorage.addEvent(Event.builder()
+                .userId(userId)
+                .eventType(EventType.LIKE)
+                .operation(OperationType.ADD)
+                .timestamp(Timestamp.from(Instant.now()))
+                .entityId(reviewId)
+                .build());
     }
 
     public void deleteLike(Long reviewId, Long userId) {
@@ -99,6 +137,13 @@ public class ReviewsService {
             log.warn("Ошибка при удалении лайка. Пользователь с id={} не найден", userId);
             throw new NotFoundException("Пользователь с id=" + userId + " не найден");
         }
+        eventStorage.addEvent(Event.builder()
+                .userId(userId)
+                .eventType(EventType.LIKE)
+                .operation(OperationType.REMOVE)
+                .timestamp(Timestamp.from(Instant.now()))
+                .entityId(reviewId)
+                .build());
         reviewStorage.deleteLike(reviewId, userId);
     }
 
