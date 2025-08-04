@@ -15,6 +15,7 @@ import ru.yandex.practicum.filmorate.storage.EventStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -112,7 +113,7 @@ public class FilmService {
                 .userId(userId)
                 .eventType(EventType.LIKE)
                 .operation(OperationType.ADD)
-                .timestamp(Instant.now().toEpochMilli())
+                .timestamp(Timestamp.from(Instant.now()))
                 .entityId(filmId)
                 .build());
         return mapToFilmDto(filmStorage.getFilm(filmId).get());
@@ -134,7 +135,7 @@ public class FilmService {
                 .userId(userId)
                 .eventType(EventType.LIKE)
                 .operation(OperationType.REMOVE)
-                .timestamp(Instant.now().toEpochMilli())
+                .timestamp(Timestamp.from(Instant.now()))
                 .entityId(filmId)
                 .build());
         return mapToFilmDto(filmStorage.getFilm(filmId).get());

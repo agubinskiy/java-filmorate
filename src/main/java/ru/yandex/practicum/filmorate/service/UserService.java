@@ -13,7 +13,9 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.EventStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.List;
 
 import static ru.yandex.practicum.filmorate.mapper.UserMapper.mapToUser;
@@ -84,7 +86,7 @@ public class UserService {
                 .userId(userId)
                 .eventType(EventType.FRIEND)
                 .operation(OperationType.ADD)
-                .timestamp(Instant.now().toEpochMilli())
+                .timestamp(Timestamp.from(Instant.now()))
                 .entityId(friendId)
                 .build());
         return mapToUserDto(userStorage.addFriend(userId, friendId));
@@ -105,7 +107,7 @@ public class UserService {
                 .userId(userId)
                 .eventType(EventType.FRIEND)
                 .operation(OperationType.REMOVE)
-                .timestamp(Instant.now().toEpochMilli())
+                .timestamp(Timestamp.from(Instant.now()))
                 .entityId(friendId)
                 .build());
         return mapToUserDto(userStorage.deleteFriend(userId, friendId));
@@ -145,8 +147,8 @@ public class UserService {
         log.info("Лента пользователя {} успешно получена", userId);
         return eventStorage.getFeed(userId).stream()
                 .map(EventMapper::mspToEventDto)
+                .sorted(Comparator.comparingLong(EventDTO::getTimestamp))
                 .toList();
-
     }
 
     public void deleteUser(Long id) {

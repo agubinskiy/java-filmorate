@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS Events (
     user_id BIGINT REFERENCES Users(id),
     event_type VARCHAR(6) NOT NULL,
     operation VARCHAR(6) NOT NULL,
-    create_time BIGINT
+    create_time TIMESTAMP NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS Reviews (

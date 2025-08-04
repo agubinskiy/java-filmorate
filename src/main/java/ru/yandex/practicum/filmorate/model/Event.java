@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import ru.yandex.practicum.filmorate.dto.EventType;
 import ru.yandex.practicum.filmorate.dto.OperationType;
 
+import java.sql.Timestamp;
+
 
 @Data
 @AllArgsConstructor
@@ -25,5 +27,5 @@ public class Event {
     @NotBlank
     private OperationType operation;
     @NotBlank
-    private long timestamp;
+    private Timestamp timestamp;
 }

@@ -15,6 +15,7 @@ import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -53,7 +54,7 @@ public class ReviewsService {
                 .userId(review.getUserId())
                 .eventType(EventType.REVIEW)
                 .operation(OperationType.ADD)
-                .timestamp(Instant.now().toEpochMilli())
+                .timestamp(Timestamp.from(Instant.now()))
                 .entityId(newReview.getReviewId())
                 .build());
         return newReview;
@@ -72,7 +73,7 @@ public class ReviewsService {
                 .userId(review.getUserId())
                 .eventType(EventType.REVIEW)
                 .operation(OperationType.UPDATE)
-                .timestamp(Instant.now().toEpochMilli())
+                .timestamp(Timestamp.from(Instant.now()))
                 .entityId(review.getReviewId())
                 .build());
         return reviewStorage.updateReview(review);
@@ -92,7 +93,7 @@ public class ReviewsService {
                     .userId(reviewStorage.findReviewById(reviewId).get().getUserId())
                     .eventType(EventType.REVIEW)
                     .operation(OperationType.REMOVE)
-                    .timestamp(Instant.now().toEpochMilli())
+                    .timestamp(Timestamp.from(Instant.now()))
                     .entityId(reviewId)
                     .build());
             reviewStorage.deleteReview(reviewId);
@@ -122,7 +123,7 @@ public class ReviewsService {
                 .userId(userId)
                 .eventType(EventType.LIKE)
                 .operation(OperationType.ADD)
-                .timestamp(Instant.now().toEpochMilli())
+                .timestamp(Timestamp.from(Instant.now()))
                 .entityId(reviewId)
                 .build());
     }
@@ -140,7 +141,7 @@ public class ReviewsService {
                 .userId(userId)
                 .eventType(EventType.LIKE)
                 .operation(OperationType.REMOVE)
-                .timestamp(Instant.now().toEpochMilli())
+                .timestamp(Timestamp.from(Instant.now()))
                 .entityId(reviewId)
                 .build());
         reviewStorage.deleteLike(reviewId, userId);

@@ -13,7 +13,7 @@ public final class EventMapper {
         dto.setUserId(event.getUserId());
         dto.setEventType(event.getEventType());
         dto.setOperation(event.getOperation());
-        dto.setTimestamp(event.getTimestamp());
+        dto.setTimestamp(event.getTimestamp().getTime());
         dto.setEventId(String.valueOf(event.getId()));
 
         return dto;
