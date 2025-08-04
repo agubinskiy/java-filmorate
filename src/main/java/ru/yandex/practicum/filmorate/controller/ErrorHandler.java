@@ -49,12 +49,12 @@ public class ErrorHandler {
         }
     }
 
-//    @ExceptionHandler(HttpMessageNotReadableException.class)
-//    @ResponseStatus(HttpStatus.BAD_REQUEST)
-//    public ErrorResponse handleHttpMessageNotReadable(final HttpMessageNotReadableException e) {
-//        log.debug("Ошибка чтения тела запроса: {}", e.getMessage());
-//        return new ErrorResponse("Некорректный запрос", "Тело запроса отсутствует");
-//    }
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleHttpMessageNotReadable(final HttpMessageNotReadableException e) {
+        log.debug("Ошибка чтения тела запроса: {}", e.getMessage());
+        return new ErrorResponse("Некорректный запрос", "Тело запроса отсутствует");
+    }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
