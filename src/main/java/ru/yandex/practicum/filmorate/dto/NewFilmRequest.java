@@ -7,6 +7,7 @@ import lombok.Data;
 import ru.yandex.practicum.filmorate.model.CreateValidation;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -27,4 +28,6 @@ public class NewFilmRequest {
     private Set<GenreDtoForFilm> genres;
 
     private RateDtoForFilm mpa;
+
+    private List<DirectorDtoForFilm> directors;
 }

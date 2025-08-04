@@ -5,22 +5,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dto.FilmDto;
-import ru.yandex.practicum.filmorate.dto.GenreDtoForFilm;
-import ru.yandex.practicum.filmorate.dto.NewFilmRequest;
-import ru.yandex.practicum.filmorate.dto.RateDtoForFilm;
-import ru.yandex.practicum.filmorate.dto.UpdateFilmRequest;
+import ru.yandex.practicum.filmorate.comparator.FilmComparatorDate;
+import ru.yandex.practicum.filmorate.comparator.FilmComparatorLikes;
+import ru.yandex.practicum.filmorate.dto.*;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.mapper.DirectorMapper;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static ru.yandex.practicum.filmorate.mapper.FilmMapper.mapToFilm;
 import static ru.yandex.practicum.filmorate.mapper.FilmMapper.mapToFilmDto;
@@ -30,10 +29,16 @@ import static ru.yandex.practicum.filmorate.mapper.FilmMapper.mapToFilmDto;
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
+    private final DirectorService directorService;
+
+    private final FilmComparatorLikes filmComparatorLikes = new FilmComparatorLikes();
+    private final FilmComparatorDate filmComparatorDate = new FilmComparatorDate();
 
     @Autowired
-    public FilmService(@Qualifier("filmDboStorage") FilmStorage filmStorage,
+    public FilmService(DirectorService directorService,
+                       @Qualifier("filmDboStorage") FilmStorage filmStorage,
                        @Qualifier("userDboStorage") UserStorage userStorage) {
+        this.directorService = directorService;
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
     }
@@ -60,6 +65,36 @@ public class FilmService {
         Film film = mapToFilm(request);
         log.debug("Запрос на добавление фильма конвертирован в объект класса Film {}", film);
         film = filmStorage.addFilm(film);
+        // Обработка режиссеров
+        // Получаем режиссеров из БД по id и устанавливаем их в фильм
+        if (request.getDirectors() != null && !request.getDirectors().isEmpty()) {
+
+            List<DirectorDto> directorsDtoList = directorService.getDirectors();
+            // Создаем пустую карту для хранения жанров по id
+            Map<Long, DirectorDto> directorMap = new HashMap<>();
+            // Проходим по всем жанрам из списка directorsDtoList
+            for (DirectorDto d : directorsDtoList) {
+                // Получаем id режиссёра
+                Long id = d.getId();
+                // Помещаем жанр в карту с ключом - его id
+                directorMap.put(id, d);
+            }
+
+            List<Director> directors = new ArrayList<>();
+            for (DirectorDtoForFilm directorRequest : request.getDirectors()) {
+                DirectorDto directorDto = directorMap.get(directorRequest.getId());
+                if (directorDto != null) {
+                    Director director = DirectorMapper.mapToDirectorFilm(directorDto);
+                    directors.add(director);
+                } else {
+                    throw new NotFoundException("Жанр с данным id не найден");
+                }
+            }
+
+            film.setDirectors(directors);
+            filmStorage.saveFilmDirectors(film.getId(), directors);
+        }
+
         log.debug("Добавление фильма успешно {}", film);
         return mapToFilmDto(film);
     }
@@ -81,6 +116,18 @@ public class FilmService {
                 });
         log.debug("Запрос на обновление фильма конвертирован в объект класса Film {}", updatedFilm);
         updatedFilm = filmStorage.updateFilm(updatedFilm);
+        if (request.getDirectors() != null) {
+            List<Director> directors = new ArrayList<>();
+            for (DirectorDtoForFilm d : request.getDirectors()) {
+                DirectorDto directorDto = directorService.getDirectorById(d.getId());
+                Director director = DirectorMapper.mapToDirectorFilm(directorDto);
+                directors.add(director);
+            }
+            // Обновляем связи режиссеров
+            filmStorage.updateFilmDirectors(request.getId(), directors);
+            // Обновляем список режиссеров в объекте фильма
+            updatedFilm.setDirectors(directors);
+        }
         log.debug("Обновление успешно {}", updatedFilm);
         return mapToFilmDto(updatedFilm);
     }
@@ -126,6 +173,61 @@ public class FilmService {
         return filmStorage.getMostLikedFilms(count).stream()
                 .map(FilmMapper::mapToFilmDto)
                 .toList();
+    }
+
+    public List<FilmDto> getDirectorFilms(long directorId) {
+        List<Film> films = filmStorage.getFilmsByIdDirector(directorId);
+        return films.stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<FilmDto> getFilmsDirectorSortByLikes(long directorId) {
+        // Получаем список фильмов по ID режиссёра
+        List<Film> films = filmStorage.getFilmsByIdDirector(directorId);
+
+        // Создаем новый список для сортировки
+        List<Film> newSortFilms = new ArrayList<>();
+
+        // Копируем все фильмы из исходного списка в новый список
+        for (int i = 0; i < films.size(); i++) {
+            newSortFilms.add(films.get(i));
+        }
+
+        // Сортируем список по количеству лайков по убыванию
+        // Используем метод sort() списка и передаем ему Comparator
+        newSortFilms.sort(filmComparatorLikes);
+
+        // Создаем список DTO для возвращения
+        List<FilmDto> filmDtoList = new ArrayList<>();
+        // Проходим по отсортированному списку фильмов
+        for (int i = 0; i < newSortFilms.size(); i++) {
+            // Для каждого фильма вызываем метод преобразования в DTO
+            FilmDto filmDto = FilmMapper.mapToFilmDto(newSortFilms.get(i));
+            filmDtoList.add(filmDto);
+        }
+
+        // Возвращаем список DTO
+        return filmDtoList;
+    }
+
+    public List<FilmDto> getFilmsDirectorSortByYear(long directorId) {
+        List<Film> films = filmStorage.getFilmsByIdDirector(directorId);
+        // Создаем новый список для сортировки
+        List<Film> newSortFilms = new ArrayList<>();
+        // Копируем все фильмы
+        for (int i = 0; i < films.size(); i++) {
+            newSortFilms.add(films.get(i));
+        }
+        // Сортируем по году (по возрастанию)
+        newSortFilms.sort(filmComparatorDate);
+
+        List<FilmDto> filmDtoList = new ArrayList<>();
+
+        for (int i = 0; i < newSortFilms.size(); i++) {
+            filmDtoList.add(FilmMapper.mapToFilmDto(newSortFilms.get(i)));
+        }
+        return filmDtoList;
     }
 
     private void validateRate(RateDtoForFilm mpa) {

@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import ru.yandex.practicum.filmorate.model.Director;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -33,4 +34,7 @@ public class FilmDto {
     private List<GenreDto> genres;
 
     private Set<Long> likes;
+
+    @NotEmpty(message = "Должен быть указан хотя бы один режиссёр")
+    private List<Director> directors;
 }
