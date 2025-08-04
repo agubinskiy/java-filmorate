@@ -44,11 +44,11 @@ public class FilmController {
         return filmService.getFilm(filmId);
     }
 
-    @GetMapping("/popular")
+    /*@GetMapping("/popular")
     public List<FilmDto> getMostLikedFilms(@RequestParam(defaultValue = "10") int count) {
         log.info("Запрошен список из {} самых популярных фильмов", count);
         return filmService.getMostLikedFilms(count);
-    }
+    }*/
 
     @PostMapping
     public FilmDto addFilm(@Validated(CreateValidation.class) @RequestBody NewFilmRequest request) {
@@ -79,5 +79,14 @@ public class FilmController {
         log.info("Удаляется фильм id={}", filmId);
         filmService.deleteFilm(filmId);
         log.info("Фильм с id={} удален", filmId);
+    }
+
+    @GetMapping("/popular")
+    public List<FilmDto> getMostLikedFilms(@RequestParam(defaultValue = "1000") int count,
+                                           @RequestParam(defaultValue = "0") long genreId,
+                                           @RequestParam(defaultValue = "0") int year
+    ) {
+        log.info("Запрошен список из {} самых популярных фильмов по жанру {} и году {}", count, genreId, year);
+        return filmService.getMostLikedFilmsByGenreYear(count, genreId, year);
     }
 }
