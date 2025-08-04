@@ -33,6 +33,19 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
             "duration = ?, rate_id = ? WHERE id = ?";
     private static final String DELETE_GENRE_QUERY = "DELETE FROM FilmGenres WHERE film_id = ?";
     private static final String INSERT_LIKE_QUERY = "INSERT INTO Likes(film_id, user_id) VALUES (?, ?)";
+    private static final String FIND_MOST_LIKED_BY_GENRE_YEAR_QUERY =
+            "SELECT f.*, count(l.user_id) as likes_count FROM Films f JOIN Likes l ON f.id = l.film_id " +
+                    "WHERE exists (select 1 from FilmGenres where film_id = f.id and genre_id = ?)" +
+                    "and EXTRACT(YEAR FROM f.release_date) = ?" +
+                    "GROUP BY f.id ORDER BY likes_count DESC LIMIT ?";
+    private static final String FIND_MOST_LIKED_BY_YEAR_QUERY =
+            "SELECT f.*, count(l.user_id) as likes_count FROM Films f JOIN Likes l ON f.id = l.film_id " +
+                    "WHERE EXTRACT(YEAR FROM f.release_date) = ?" +
+                    "GROUP BY f.id ORDER BY likes_count DESC LIMIT ?";
+    private static final String FIND_MOST_LIKED_BY_GENRE_QUERY =
+            "SELECT f.*, count(l.user_id) as likes_count FROM Films f JOIN Likes l ON f.id = l.film_id " +
+                    "WHERE exists (select 1 from FilmGenres where film_id = f.id and genre_id = ?)" +
+                    "GROUP BY f.id ORDER BY likes_count DESC LIMIT ?";
 
     public FilmDbStorage(JdbcTemplate jdbc) {
         super(jdbc);
@@ -147,5 +160,41 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
             result.computeIfAbsent(filmId, k -> new HashSet<>()).add(userId);
         });
         return result;
+    }
+
+    public List<Film> getMostLikedFilmsByGenreYear(int count, long genreId, int year) {
+        List<Long> filmIds = jdbc.query(FIND_MOST_LIKED_BY_GENRE_YEAR_QUERY,
+                (rs, rn) -> rs.getLong("id"), genreId, year, count);
+        if (filmIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        Map<Long, List<Genre>> genres = findGenresForFilms(filmIds);
+        Map<Long, Set<Long>> likes = findLikesForFilms(filmIds);
+        RowMapper<Film> mapper = new FilmRowMapper(genres, likes);
+        return findMany(FIND_MOST_LIKED_BY_GENRE_YEAR_QUERY, mapper, genreId, year, count);
+    }
+
+    public List<Film> getMostLikedFilmsByGenre(int count, long genreId) {
+        List<Long> filmIds = jdbc.query(FIND_MOST_LIKED_BY_GENRE_QUERY,
+                (rs, rn) -> rs.getLong("id"), genreId, count);
+        if (filmIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        Map<Long, List<Genre>> genres = findGenresForFilms(filmIds);
+        Map<Long, Set<Long>> likes = findLikesForFilms(filmIds);
+        RowMapper<Film> mapper = new FilmRowMapper(genres, likes);
+        return findMany(FIND_MOST_LIKED_BY_GENRE_QUERY, mapper, genreId, count);
+    }
+
+    public List<Film> getMostLikedFilmsByYear(int count, int year) {
+        List<Long> filmIds = jdbc.query(FIND_MOST_LIKED_BY_YEAR_QUERY,
+                (rs, rn) -> rs.getLong("id"), year, count);
+        if (filmIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        Map<Long, List<Genre>> genres = findGenresForFilms(filmIds);
+        Map<Long, Set<Long>> likes = findLikesForFilms(filmIds);
+        RowMapper<Film> mapper = new FilmRowMapper(genres, likes);
+        return findMany(FIND_MOST_LIKED_BY_YEAR_QUERY, mapper, year, count);
     }
 }
