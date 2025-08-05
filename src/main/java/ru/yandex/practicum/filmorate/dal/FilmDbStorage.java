@@ -216,7 +216,8 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
     public List<Film> getCommonFilms(Long userId, Long friendId) {
         Map<Long, List<Genre>> genres = findGenresForFilms();
         Map<Long, Set<Long>> likes = findLikesForFilms();
-        RowMapper<Film> mapper = new FilmRowMapper(genres, likes);
+        Map<Long, List<Director>> directors = findDirectorsForFilms();
+        RowMapper<Film> mapper = new FilmRowMapper(genres, likes,directors);
         return findMany(FIND_COMMON_FILMS, mapper, userId, friendId);
     }
 
