@@ -48,8 +48,8 @@ public class FilmService {
 
     @Autowired
     public FilmService(DirectorService directorService,
-                       @Qualifier("filmDboStorage") FilmStorage filmStorage,
-                       @Qualifier("userDboStorage") UserStorage userStorage,
+                       @Qualifier("filmDbStorage") FilmStorage filmStorage,
+                       @Qualifier("userDbStorage") UserStorage userStorage,
                        EventStorage eventStorage) {
         this.directorService = directorService;
         this.filmStorage = filmStorage;
@@ -82,35 +82,37 @@ public class FilmService {
         // Обработка режиссеров
         // Получаем режиссеров из БД по id и устанавливаем их в фильм
         if (request.getDirectors() != null && !request.getDirectors().isEmpty()) {
-
-            List<DirectorDto> directorsDtoList = directorService.getDirectors();
-            // Создаем пустую карту для хранения жанров по id
-            Map<Long, DirectorDto> directorMap = new HashMap<>();
-            // Проходим по всем жанрам из списка directorsDtoList
-            for (DirectorDto d : directorsDtoList) {
-                // Получаем id режиссёра
-                Long id = d.getId();
-                // Помещаем жанр в карту с ключом - его id
-                directorMap.put(id, d);
-            }
-
-            List<Director> directors = new ArrayList<>();
-            for (DirectorDtoForFilm directorRequest : request.getDirectors()) {
-                DirectorDto directorDto = directorMap.get(directorRequest.getId());
-                if (directorDto != null) {
-                    Director director = DirectorMapper.mapToDirectorFilm(directorDto);
-                    directors.add(director);
-                } else {
-                    throw new NotFoundException("Жанр с данным id не найден");
-                }
-            }
-
-            film.setDirectors(directors);
-            filmStorage.saveFilmDirectors(film.getId(), directors);
+            getDirectorsFilm(film, request);
         }
 
         log.debug("Добавление фильма успешно {}", film);
         return mapToFilmDto(film);
+    }
+
+
+    public void getDirectorsFilm(Film film, NewFilmRequest request) {
+        List<DirectorDto> directorsDtoList = directorService.getDirectors();
+        // Создаем пустую карту для хранения жанров по id
+        Map<Long, DirectorDto> directorMap = new HashMap<>();
+        // Проходим по всем жанрам из списка directorsDtoList
+        for (DirectorDto d : directorsDtoList) {
+            // Получаем id режиссёра
+            Long id = d.getId();
+            // Помещаем жанр в карту с ключом - его id
+            directorMap.put(id, d);
+        }
+        List<Director> directors = new ArrayList<>();
+        for (DirectorDtoForFilm directorRequest : request.getDirectors()) {
+            DirectorDto directorDto = directorMap.get(directorRequest.getId());
+            if (directorDto != null) {
+                Director director = DirectorMapper.mapToDirectorFilm(directorDto);
+                directors.add(director);
+            } else {
+                throw new NotFoundException("Режиссёр с данным id не найден");
+            }
+        }
+        film.setDirectors(directors);
+        filmStorage.saveFilmDirectors(film.getId(), directors);
     }
 
     public FilmDto updateFilm(UpdateFilmRequest request) {
@@ -131,19 +133,24 @@ public class FilmService {
         log.debug("Запрос на обновление фильма конвертирован в объект класса Film {}", updatedFilm);
         updatedFilm = filmStorage.updateFilm(updatedFilm);
         if (request.getDirectors() != null) {
-            List<Director> directors = new ArrayList<>();
-            for (DirectorDtoForFilm d : request.getDirectors()) {
-                DirectorDto directorDto = directorService.getDirectorById(d.getId());
-                Director director = DirectorMapper.mapToDirectorFilm(directorDto);
-                directors.add(director);
-            }
-            // Обновляем связи режиссеров
-            filmStorage.updateFilmDirectors(request.getId(), directors);
-            // Обновляем список режиссеров в объекте фильма
-            updatedFilm.setDirectors(directors);
+            updateDirectorsFilm(updatedFilm, request);
         }
         log.debug("Обновление успешно {}", updatedFilm);
         return mapToFilmDto(updatedFilm);
+    }
+
+    public void updateDirectorsFilm(Film updatedFilm, UpdateFilmRequest request) {
+        List<Director> directors = new ArrayList<>();
+        for (DirectorDtoForFilm d : request.getDirectors()) {
+            DirectorDto directorDto = directorService.getDirectorById(d.getId());
+            Director director = DirectorMapper.mapToDirectorFilm(directorDto);
+            directors.add(director);
+        }
+        // Обновляем связи режиссеров
+        filmStorage.updateFilmDirectors(request.getId(), directors);
+        // Обновляем список режиссеров в объекте фильма
+        updatedFilm.setDirectors(directors);
+
     }
 
     public FilmDto getFilm(Long filmId) {
@@ -215,27 +222,17 @@ public class FilmService {
     public List<FilmDto> getFilmsDirectorSortByLikes(long directorId) {
         // Получаем список фильмов по ID режиссёра
         List<Film> films = filmStorage.getFilmsByIdDirector(directorId);
-
         // Создаем новый список для сортировки
-        List<Film> newSortFilms = new ArrayList<>();
-
-        // Копируем все фильмы из исходного списка в новый список
-        for (int i = 0; i < films.size(); i++) {
-            newSortFilms.add(films.get(i));
-        }
+        List<Film> newSortFilms = films.stream()
+                .collect(Collectors.toList());
 
         // Сортируем список по количеству лайков по убыванию
-        // Используем метод sort() списка и передаем ему Comparator
         newSortFilms.sort(filmComparatorLikes);
 
         // Создаем список DTO для возвращения
-        List<FilmDto> filmDtoList = new ArrayList<>();
-        // Проходим по отсортированному списку фильмов
-        for (int i = 0; i < newSortFilms.size(); i++) {
-            // Для каждого фильма вызываем метод преобразования в DTO
-            FilmDto filmDto = FilmMapper.mapToFilmDto(newSortFilms.get(i));
-            filmDtoList.add(filmDto);
-        }
+        List<FilmDto> filmDtoList = newSortFilms.stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
 
         // Возвращаем список DTO
         return filmDtoList;
@@ -244,19 +241,16 @@ public class FilmService {
     public List<FilmDto> getFilmsDirectorSortByYear(long directorId) {
         List<Film> films = filmStorage.getFilmsByIdDirector(directorId);
         // Создаем новый список для сортировки
-        List<Film> newSortFilms = new ArrayList<>();
-        // Копируем все фильмы
-        for (int i = 0; i < films.size(); i++) {
-            newSortFilms.add(films.get(i));
-        }
+        List<Film> newSortFilms = films.stream()
+                .collect(Collectors.toList());
+
         // Сортируем по году (по возрастанию)
         newSortFilms.sort(filmComparatorDate);
 
-        List<FilmDto> filmDtoList = new ArrayList<>();
+        List<FilmDto> filmDtoList = newSortFilms.stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
 
-        for (int i = 0; i < newSortFilms.size(); i++) {
-            filmDtoList.add(FilmMapper.mapToFilmDto(newSortFilms.get(i)));
-        }
         return filmDtoList;
     }
 

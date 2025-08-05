@@ -30,8 +30,8 @@ public class ReviewsService {
     private final EventDBStorage eventStorage;
 
     @Autowired
-    public ReviewsService(@Qualifier("filmDboStorage") FilmStorage filmStorage,
-                          @Qualifier("userDboStorage") UserStorage userStorage,
+    public ReviewsService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
+                          @Qualifier("userDbStorage") UserStorage userStorage,
                           @Qualifier("reviewsDbStorage") ReviewsDbStorage reviewStorage,
                           @Qualifier("eventDBStorage")EventDBStorage eventStorage) {
         this.filmStorage = filmStorage;

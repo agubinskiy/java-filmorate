@@ -9,7 +9,7 @@ import ru.yandex.practicum.filmorate.model.Director;
 import java.util.List;
 import java.util.Optional;
 
-@Repository("directorDboStorage")
+@Repository("directorDbStorage")
 public class DirectorDbStorage extends BaseDbStorage<Director> {
 
     private static final String INSERT_QUERY = "INSERT INTO directors(name) VALUES (?)";

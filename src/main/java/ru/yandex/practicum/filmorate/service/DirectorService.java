@@ -18,7 +18,7 @@ public class DirectorService {
 
     private final DirectorDbStorage directorDbStorage;
 
-    public DirectorService(@Qualifier("directorDboStorage") DirectorDbStorage directorDbStorage) {
+    public DirectorService(@Qualifier("directorDbStorage") DirectorDbStorage directorDbStorage) {
         this.directorDbStorage = directorDbStorage;
     }
 
