@@ -3,7 +3,11 @@ package ru.yandex.practicum.filmorate.storage;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
+
+
+import java.util.*;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -13,6 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.ArrayList;
+
 
 @Component
 @Slf4j
@@ -79,6 +84,21 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public List<Film> getMostLikedFilmsByYear(int count, int year) {
         return null;
+    }
+
+    @Override
+
+    public void saveFilmDirectors(long filmId, List<Director> directors){
+    }
+
+    @Override
+    public List<Film> getFilmsByIdDirector(long directorId) {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public void updateFilmDirectors(Long filmId, List<Director> directors) {
+
     }
 
     @Override

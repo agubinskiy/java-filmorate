@@ -7,6 +7,7 @@ import lombok.Data;
 import ru.yandex.practicum.filmorate.model.UpdateValidation;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -28,6 +29,8 @@ public class UpdateFilmRequest {
     private Set<GenreDtoForFilm> genres;
 
     private RateDtoForFilm mpa;
+
+    private List<DirectorDtoForFilm> directors;
 
     public boolean hasName() {
         return !(name == null || name.isBlank());
@@ -51,5 +54,9 @@ public class UpdateFilmRequest {
 
     public boolean hasRate() {
         return !(mpa == null);
+    }
+
+    public boolean hasDirectors() {
+        return !(directors == null || directors.isEmpty());
     }
 }

@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.constraints.Positive;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -88,6 +89,21 @@ public class FilmController {
     ) {
         log.info("Запрошен список из {} самых популярных фильмов по жанру {} и году {}", count, genreId, year);
         return filmService.getMostLikedFilmsByGenreYear(count, genreId, year);
+    }
+
+    @GetMapping("/director/{directorId}")
+    public List<FilmDto> getDirectFilms(
+            @PathVariable("directorId") @Positive long directorId,
+            @RequestParam(value = "sortBy", required = false) String sortBy) {
+        log.info("Запрошен список фильмов по режиссёру с сортировкой: {}", sortBy);
+
+        if ("likes".equals(sortBy)) {
+            return filmService.getFilmsDirectorSortByLikes(directorId);
+        } else if ("year".equals(sortBy)) {
+            return filmService.getFilmsDirectorSortByYear(directorId);
+        } else {
+            return filmService.getDirectorFilms(directorId);
+        }
     }
 
     @GetMapping("/common")

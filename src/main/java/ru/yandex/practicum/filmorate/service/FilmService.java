@@ -5,11 +5,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+
+import ru.yandex.practicum.filmorate.comparator.FilmComparatorDate;
+import ru.yandex.practicum.filmorate.comparator.FilmComparatorLikes;
+
 import ru.yandex.practicum.filmorate.dto.*;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.mapper.DirectorMapper;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
+
+import ru.yandex.practicum.filmorate.model.Director;
+
 import ru.yandex.practicum.filmorate.model.Event;
+
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.EventStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
@@ -18,6 +27,8 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -31,12 +42,22 @@ import static ru.yandex.practicum.filmorate.mapper.FilmMapper.mapToFilmDto;
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
+
+    private final DirectorService directorService;
+
+    private final FilmComparatorLikes filmComparatorLikes = new FilmComparatorLikes();
+    private final FilmComparatorDate filmComparatorDate = new FilmComparatorDate();
+
     private final EventStorage eventStorage;
 
     @Autowired
     public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
                        @Qualifier("userDbStorage") UserStorage userStorage,
+    public FilmService(DirectorService directorService,
+                       @Qualifier("filmDbStorage") FilmStorage filmStorage,
+                       @Qualifier("userDbStorage") UserStorage userStorage,
                        EventStorage eventStorage) {
+        this.directorService = directorService;
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
         this.eventStorage = eventStorage;
@@ -64,8 +85,40 @@ public class FilmService {
         Film film = mapToFilm(request);
         log.debug("Запрос на добавление фильма конвертирован в объект класса Film {}", film);
         film = filmStorage.addFilm(film);
+        // Обработка режиссеров
+        // Получаем режиссеров из БД по id и устанавливаем их в фильм
+        if (request.getDirectors() != null && !request.getDirectors().isEmpty()) {
+            getDirectorsFilm(film, request);
+        }
+
         log.debug("Добавление фильма успешно {}", film);
         return mapToFilmDto(film);
+    }
+
+
+    public void getDirectorsFilm(Film film, NewFilmRequest request) {
+        List<DirectorDto> directorsDtoList = directorService.getDirectors();
+        // Создаем пустую карту для хранения жанров по id
+        Map<Long, DirectorDto> directorMap = new HashMap<>();
+        // Проходим по всем жанрам из списка directorsDtoList
+        for (DirectorDto d : directorsDtoList) {
+            // Получаем id режиссёра
+            Long id = d.getId();
+            // Помещаем жанр в карту с ключом - его id
+            directorMap.put(id, d);
+        }
+        List<Director> directors = new ArrayList<>();
+        for (DirectorDtoForFilm directorRequest : request.getDirectors()) {
+            DirectorDto directorDto = directorMap.get(directorRequest.getId());
+            if (directorDto != null) {
+                Director director = DirectorMapper.mapToDirectorFilm(directorDto);
+                directors.add(director);
+            } else {
+                throw new NotFoundException("Режиссёр с данным id не найден");
+            }
+        }
+        film.setDirectors(directors);
+        filmStorage.saveFilmDirectors(film.getId(), directors);
     }
 
     public FilmDto updateFilm(UpdateFilmRequest request) {
@@ -85,8 +138,25 @@ public class FilmService {
                 });
         log.debug("Запрос на обновление фильма конвертирован в объект класса Film {}", updatedFilm);
         updatedFilm = filmStorage.updateFilm(updatedFilm);
+        if (request.getDirectors() != null) {
+            updateDirectorsFilm(updatedFilm, request);
+        }
         log.debug("Обновление успешно {}", updatedFilm);
         return mapToFilmDto(updatedFilm);
+    }
+
+    public void updateDirectorsFilm(Film updatedFilm, UpdateFilmRequest request) {
+        List<Director> directors = new ArrayList<>();
+        for (DirectorDtoForFilm d : request.getDirectors()) {
+            DirectorDto directorDto = directorService.getDirectorById(d.getId());
+            Director director = DirectorMapper.mapToDirectorFilm(directorDto);
+            directors.add(director);
+        }
+        // Обновляем связи режиссеров
+        filmStorage.updateFilmDirectors(request.getId(), directors);
+        // Обновляем список режиссеров в объекте фильма
+        updatedFilm.setDirectors(directors);
+
     }
 
     public FilmDto getFilm(Long filmId) {
@@ -146,6 +216,27 @@ public class FilmService {
         return filmStorage.getMostLikedFilms(count).stream()
                 .map(FilmMapper::mapToFilmDto)
                 .toList();
+    }
+
+    public List<FilmDto> getDirectorFilms(long directorId) {
+        List<Film> films = filmStorage.getFilmsByIdDirector(directorId);
+        return films.stream()
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<FilmDto> getFilmsDirectorSortByLikes(long directorId) {
+        return filmStorage.getFilmsByIdDirector(directorId).stream()
+                .sorted(filmComparatorLikes)
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<FilmDto> getFilmsDirectorSortByYear(long directorId) {
+        return filmStorage.getFilmsByIdDirector(directorId).stream()
+                .sorted(filmComparatorDate)
+                .map(FilmMapper::mapToFilmDto)
+                .collect(Collectors.toList());
     }
 
     private void validateRate(RateDtoForFilm mpa) {
