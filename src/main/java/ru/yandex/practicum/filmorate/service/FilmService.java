@@ -220,38 +220,17 @@ public class FilmService {
     }
 
     public List<FilmDto> getFilmsDirectorSortByLikes(long directorId) {
-        // Получаем список фильмов по ID режиссёра
-        List<Film> films = filmStorage.getFilmsByIdDirector(directorId);
-        // Создаем новый список для сортировки
-        List<Film> newSortFilms = films.stream()
-                .collect(Collectors.toList());
-
-        // Сортируем список по количеству лайков по убыванию
-        newSortFilms.sort(filmComparatorLikes);
-
-        // Создаем список DTO для возвращения
-        List<FilmDto> filmDtoList = newSortFilms.stream()
+        return filmStorage.getFilmsByIdDirector(directorId).stream()
+                .sorted(filmComparatorLikes)
                 .map(FilmMapper::mapToFilmDto)
                 .collect(Collectors.toList());
-
-        // Возвращаем список DTO
-        return filmDtoList;
     }
 
     public List<FilmDto> getFilmsDirectorSortByYear(long directorId) {
-        List<Film> films = filmStorage.getFilmsByIdDirector(directorId);
-        // Создаем новый список для сортировки
-        List<Film> newSortFilms = films.stream()
-                .collect(Collectors.toList());
-
-        // Сортируем по году (по возрастанию)
-        newSortFilms.sort(filmComparatorDate);
-
-        List<FilmDto> filmDtoList = newSortFilms.stream()
+        return filmStorage.getFilmsByIdDirector(directorId).stream()
+                .sorted(filmComparatorDate)
                 .map(FilmMapper::mapToFilmDto)
                 .collect(Collectors.toList());
-
-        return filmDtoList;
     }
 
     private void validateRate(RateDtoForFilm mpa) {
