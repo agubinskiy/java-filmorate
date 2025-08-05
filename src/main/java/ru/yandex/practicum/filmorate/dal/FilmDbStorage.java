@@ -36,9 +36,12 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
     private static final String DELETE_GENRE_QUERY = "DELETE FROM FilmGenres WHERE film_id = ?";
     private static final String INSERT_LIKE_QUERY = "INSERT INTO Likes(film_id, user_id) VALUES (?, ?)";
     private static final String FIND_USERS_LIKES = "SELECT film_id FROM Likes WHERE user_id = ?";
-    private static final String FIND_COMMON_FILMS = "SELECT film_id FROM Likes WHERE user_id = ? INTERSECT " +
-            "SELECT film_id FROM Likes WHERE user_id = ?";
+    // private static final String FIND_COMMON_FILMS = "SELECT film_id FROM Likes WHERE user_id = ? INTERSECT " +
+     //       "SELECT film_id FROM Likes WHERE user_id = ?";
+    private static final String FIND_COMMON_FILMS = "SELECT f.* FROM films f JOIN ( SELECT film_id FROM Likes WHERE user_id = ? " +
+            "INTERSECT SELECT film_id  FROM Likes WHERE user_id = ?) common_likes (film_id) ON f.id = common_likes.film_id;";
     private static final String DELETE_FILM_QUERY = "DELETE FROM Films WHERE id = ?";
+    private static final String DELETE_LIKE_QUERY = "DELETE FROM Likes WHERE user_id = ? AND film_id =?";
     private static final String FIND_MOST_LIKED_BY_GENRE_YEAR_QUERY =
             "SELECT f.*, count(l.user_id) as likes_count FROM Films f JOIN Likes l ON f.id = l.film_id " +
                     "WHERE exists (select 1 from FilmGenres where film_id = f.id and genre_id = ?)" +
@@ -145,8 +148,20 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
         return result;
     }
 
-    public List<Long> getCommonFilms(Long userId, Long friendId) {
-        return jdbc.queryForList(FIND_COMMON_FILMS, Long.class, userId, friendId);
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+        Map<Long, List<Genre>> genres = findGenresForFilms();
+        Map<Long, Set<Long>> likes = findLikesForFilms();
+        RowMapper<Film> mapper = new FilmRowMapper(genres, likes);
+        return findMany(FIND_COMMON_FILMS, mapper, userId, friendId);
+    }
+
+    @Override
+    public void removeLike(Long userId, Long filmId) {
+        delete(
+                DELETE_LIKE_QUERY,
+                userId,
+                filmId
+        );
     }
 
     private Map<Long, List<Genre>> findGenresForFilms() {

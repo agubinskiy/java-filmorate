@@ -103,11 +103,16 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public List<Long> getCommonFilms(Long userId, Long friendId) {
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
         //копируем список фильмов пользователя
         List<Long> commonFilms = new ArrayList<>(getUserLikes(userId));
         //оставляем только пересечения со списком фильмов друга
         commonFilms.retainAll(getUserLikes(friendId));
-        return commonFilms;
+        return null;
+    }
+
+    @Override
+    public void removeLike(Long userId, Long filmId) {
+
     }
 }

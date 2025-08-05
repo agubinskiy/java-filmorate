@@ -33,7 +33,7 @@ public class UserService {
     private final EventStorage eventStorage;
 
     @Autowired
-    public UserService(@Qualifier("userDboStorage") UserStorage userStorage, @Qualifier("filmDbStorage") FilmStorage filmStorage,
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage, @Qualifier("filmDbStorage") FilmStorage filmStorage,
                        EventStorage eventStorage) {
         this.userStorage = userStorage;
         this.eventStorage = eventStorage;
