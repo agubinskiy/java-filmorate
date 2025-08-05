@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.dto.SearchBy;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
@@ -39,5 +40,7 @@ public interface FilmStorage {
 
     List<Film> getCommonFilms(Long userId, Long friendId);
 
+
+    List<Film> searchFilms(String query, SearchBy by);
     void removeLike(Long userId, Long filmId);
 }

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.dto.NewFilmRequest;
+import ru.yandex.practicum.filmorate.dto.SearchBy;
 import ru.yandex.practicum.filmorate.dto.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.model.CreateValidation;
 import ru.yandex.practicum.filmorate.model.UpdateValidation;
@@ -50,6 +51,12 @@ public class FilmController {
         log.info("Запрошен список из {} самых популярных фильмов", count);
         return filmService.getMostLikedFilms(count);
     }*/
+
+    @GetMapping("/search")
+    public List<FilmDto> searchFilms(@RequestParam String query, @RequestParam String by) {
+        log.info("Запрошен поиск фильмов");
+        return filmService.searchFilms(query, SearchBy.fromString(by));
+    }
 
     @PostMapping
     public FilmDto addFilm(@Validated(CreateValidation.class) @RequestBody NewFilmRequest request) {

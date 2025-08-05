@@ -4,10 +4,8 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.dto.SearchBy;
 import ru.yandex.practicum.filmorate.model.Film;
-
-
-import java.util.*;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -88,7 +86,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
 
-    public void saveFilmDirectors(long filmId, List<Director> directors){
+    public void saveFilmDirectors(long filmId, List<Director> directors) {
     }
 
     @Override
@@ -134,5 +132,15 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public void removeLike(Long userId, Long filmId) {
 
+    }
+
+    @Override
+    public List<Film> searchFilms(String query, SearchBy by) {
+        if (by.equals(SearchBy.TITLE)) {
+            return films.values().stream()
+                    .filter(film -> film.getName().toLowerCase().contains(query))
+                    .toList();
+        }
+        return Collections.emptyList();
     }
 }
