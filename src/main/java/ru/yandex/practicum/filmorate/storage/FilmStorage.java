@@ -37,6 +37,7 @@ public interface FilmStorage {
 
     Map<Long, Map<Long, Double>> getAllLikes();
 
-    List<Long> getCommonFilms(Long userId, Long friendId);
+    List<Film> getCommonFilms(Long userId, Long friendId);
 
+    void removeLike(Long userId, Long filmId);
 }

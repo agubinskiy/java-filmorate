@@ -105,4 +105,11 @@ public class FilmController {
             return filmService.getDirectorFilms(directorId);
         }
     }
+
+    @GetMapping("/common")
+    public List<FilmDto> getCommonFilms(@RequestParam long userId, @RequestParam long friendId) {
+        log.info("Запрошен список общих фильмо в пользователей с userId {} и friendId = {}", userId, friendId);
+        return filmService.getCommonFilms(userId, friendId);
+    }
+
 }

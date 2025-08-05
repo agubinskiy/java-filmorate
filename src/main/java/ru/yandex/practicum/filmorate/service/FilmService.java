@@ -29,6 +29,10 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
 
 import static ru.yandex.practicum.filmorate.mapper.FilmMapper.mapToFilm;
 import static ru.yandex.practicum.filmorate.mapper.FilmMapper.mapToFilmDto;
@@ -193,7 +197,7 @@ public class FilmService {
             log.warn("Ошибка при удалении лайка. Фильм с id={} не найден", filmId);
             throw new NotFoundException("Фильм с id=" + filmId + " не найден");
         }
-        filmStorage.getFilm(filmId).get().getLikes().remove(userId);
+        filmStorage.removeLike(userId, filmId);
         log.info("Лайк успешно удалён.");
         //добавить событие в ленту
         eventStorage.addEvent(Event.builder()
@@ -276,5 +280,19 @@ public class FilmService {
         }
         filmStorage.deleteFilm(filmId);
         log.info("Фильм с id={} успешно удален", filmId);
+    }
+
+    public List<FilmDto> getCommonFilms(long userId, long friendId) {
+        if (userStorage.getUser(userId).isEmpty()) {
+            log.warn("Ошибка при запросе общих фильмов. Пользователь с userId {} не найден", userId);
+        }
+        if (userStorage.getUser(userId).isEmpty()) {
+            log.warn("Ошибка при запросе общих фильмов. Пользователь с friendId {} не найден", userId);
+        }
+        return filmStorage.getCommonFilms(userId, friendId)
+                .stream()
+                .map(FilmMapper::mapToFilmDto)
+                .sorted(Comparator.comparingInt((FilmDto film)  -> film.getLikes().size()).reversed())
+                .toList();
     }
 }
