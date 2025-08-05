@@ -174,7 +174,7 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
         });
         return result;
     }
-
+    
     private Map<Long, Set<Long>> findLikesForFilms() {
         String query = "SELECT * FROM Likes";
         Map<Long, Set<Long>> result = new HashMap<>();
