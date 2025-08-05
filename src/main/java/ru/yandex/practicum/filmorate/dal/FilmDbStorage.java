@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dal.mappers.FilmRowMapper;
 import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.dto.SearchBy;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
@@ -117,7 +118,6 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
         Map<Long, List<Director>> directors = findDirectorsForFilms();
         RowMapper<Film> mapper = new FilmRowMapper(genres, likes, directors);
         return findMany(FIND_MOST_LIKED_QUERY, mapper, count);
-
     }
 
     public Film addFilm(Film film) {
@@ -212,6 +212,36 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
 
     public List<Long> getCommonFilms(Long userId, Long friendId) {
         return jdbc.queryForList(FIND_COMMON_FILMS, Long.class, userId, friendId);
+    }
+
+    public List<Film> searchFilms(String query, SearchBy by) {
+        Object[] params = {"%" + query.toLowerCase() + "%"};
+        String searchQuery = null;
+        if (by.equals(SearchBy.TITLE)) {
+            searchQuery = "SELECT * FROM Films WHERE LOWER(name) LIKE ?";
+        } else if (by.equals(SearchBy.DIRECTOR)) {
+            searchQuery = "SELECT * FROM Films f " +
+                    "JOIN film_directors fd ON f.id = fd.film_id " +
+                    "JOIN directors d ON fd.director_id = d.directors_id " +
+                    "WHERE LOWER(d.name) LIKE ?";
+        } else if (by.equals(SearchBy.DIRECTOR_AND_TITLE) || by.equals(SearchBy.TITLE_AND_DIRECTOR)) {
+            searchQuery = "SELECT * FROM Films f " +
+                    "LEFT JOIN film_directors fd ON f.id = fd.film_id " +
+                    "LEFT JOIN directors d ON fd.director_id = d.directors_id " +
+                    "WHERE LOWER(d.name) LIKE ? OR LOWER(f.name) LIKE ?";
+            params = new Object[]{"%" + query.toLowerCase() + "%", "%" + query.toLowerCase() + "%"};
+        }
+        List<Long> filmIds = jdbc.query(searchQuery,
+                (rs, rn) -> rs.getLong("id"),
+                params);
+        if (filmIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        Map<Long, List<Genre>> genres = findGenresForFilms(filmIds);
+        Map<Long, Set<Long>> likes = findLikesForFilms(filmIds);
+        Map<Long, List<Director>> directors = findDirectorsForFilms();
+        RowMapper<Film> mapper = new FilmRowMapper(genres, likes, directors);
+        return findMany(searchQuery, mapper, params);
     }
 
     private Map<Long, List<Genre>> findGenresForFilms() {

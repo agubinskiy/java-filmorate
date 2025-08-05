@@ -4,19 +4,11 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.dto.SearchBy;
 import ru.yandex.practicum.filmorate.model.Film;
 
 
 import java.util.*;
-
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.ArrayList;
 
 
 @Component
@@ -88,7 +80,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
 
-    public void saveFilmDirectors(long filmId, List<Director> directors){
+    public void saveFilmDirectors(long filmId, List<Director> directors) {
     }
 
     @Override
@@ -115,7 +107,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         return result;
     }
 
-     List<Long> getUserLikes(Long userId) {
+    List<Long> getUserLikes(Long userId) {
         return films.entrySet().stream()
                 .filter(entry -> entry.getValue().getLikes().contains(userId))
                 .map(Map.Entry::getKey)
@@ -130,5 +122,15 @@ public class InMemoryFilmStorage implements FilmStorage {
         commonFilms.retainAll(getUserLikes(friendId));
         return commonFilms;
 
+    }
+
+    @Override
+    public List<Film> searchFilms(String query, SearchBy by) {
+        if (by.equals(SearchBy.TITLE)) {
+            return films.values().stream()
+                    .filter(film -> film.getName().toLowerCase().contains(query))
+                    .toList();
+        }
+        return Collections.emptyList();
     }
 }

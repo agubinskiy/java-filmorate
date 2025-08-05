@@ -212,6 +212,12 @@ public class FilmService {
                 .toList();
     }
 
+    public List<FilmDto> searchFilms(String query, SearchBy by) {
+        return filmStorage.searchFilms(query, by).stream()
+                .map(FilmMapper::mapToFilmDto)
+                .toList();
+    }
+
     public List<FilmDto> getDirectorFilms(long directorId) {
         List<Film> films = filmStorage.getFilmsByIdDirector(directorId);
         return films.stream()
