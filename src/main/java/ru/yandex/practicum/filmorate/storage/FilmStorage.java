@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.Collection;
@@ -28,7 +29,14 @@ public interface FilmStorage {
 
     List<Film> getMostLikedFilmsByYear(int count, int year);
 
+    void saveFilmDirectors(long filmId, List<Director> directors);
+
+    List<Film> getFilmsByIdDirector(long directorId);
+
+    void updateFilmDirectors(Long filmId, List<Director> directors);
+
     Map<Long, Map<Long, Double>> getAllLikes();
 
     List<Long> getCommonFilms(Long userId, Long friendId);
+
 }

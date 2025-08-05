@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.dal.FilmDbStorage;
 import ru.yandex.practicum.filmorate.dal.mappers.FilmRowMapper;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rate;
@@ -50,6 +51,13 @@ public class FilmDbStorageTest {
         jdbcTemplate.update("INSERT INTO Likes(film_id, user_id) VALUES (1, 2)");
         jdbcTemplate.update("INSERT INTO Likes(film_id, user_id) VALUES (1, 3)");
         jdbcTemplate.update("INSERT INTO Likes(film_id, user_id) VALUES (2, 2)");
+
+        jdbcTemplate.update("INSERT INTO directors(name) VALUES('director1')");
+        jdbcTemplate.update("INSERT INTO directors(name) VALUES('director2')");
+        jdbcTemplate.update("INSERT INTO directors(name) VALUES('director3')");
+        jdbcTemplate.update("INSERT INTO film_directors(film_id, director_id) VALUES(1, 1)");
+        jdbcTemplate.update("INSERT INTO film_directors(film_id, director_id) VALUES(2, 2)");
+        jdbcTemplate.update("INSERT INTO film_directors(film_id, director_id) VALUES(3, 3)");
     }
 
     @Test
@@ -86,6 +94,7 @@ public class FilmDbStorageTest {
                 .duration(120)
                 .mpa(Rate.PG)
                 .genres(List.of(Genre.ACTION))
+                .directors(List.of(new Director(1L, "Director Name")))
                 .build();
         Film result = filmStorage.addFilm(film);
 
@@ -104,6 +113,7 @@ public class FilmDbStorageTest {
                 .duration(100)
                 .mpa(Rate.PG)
                 .genres(List.of(Genre.ACTION))
+                .directors(List.of(new Director(1L, "Director Name")))
                 .build();
         Film result = filmStorage.updateFilm(film);
 

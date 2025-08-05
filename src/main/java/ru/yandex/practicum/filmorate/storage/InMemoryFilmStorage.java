@@ -3,7 +3,11 @@ package ru.yandex.practicum.filmorate.storage;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
+
+
+import java.util.*;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -13,6 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.ArrayList;
+
 
 @Component
 @Slf4j
@@ -82,6 +87,21 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+
+    public void saveFilmDirectors(long filmId, List<Director> directors){
+    }
+
+    @Override
+    public List<Film> getFilmsByIdDirector(long directorId) {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public void updateFilmDirectors(Long filmId, List<Director> directors) {
+
+    }
+
+    @Override
     public Map<Long, Map<Long, Double>> getAllLikes() {
         Map<Long, Map<Long, Double>> result = new HashMap<>();
         for (Film film : films.values()) {
@@ -95,7 +115,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         return result;
     }
 
-    private List<Long> getUserLikes(Long userId) {
+     List<Long> getUserLikes(Long userId) {
         return films.entrySet().stream()
                 .filter(entry -> entry.getValue().getLikes().contains(userId))
                 .map(Map.Entry::getKey)
@@ -109,5 +129,6 @@ public class InMemoryFilmStorage implements FilmStorage {
         //оставляем только пересечения со списком фильмов друга
         commonFilms.retainAll(getUserLikes(friendId));
         return commonFilms;
+
     }
 }
