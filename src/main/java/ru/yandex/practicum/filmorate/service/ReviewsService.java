@@ -105,8 +105,13 @@ public class ReviewsService {
 
     public List<ReviewDto> getFilmReviews(Integer count, Long filmId) {
         log.info("Запрошен отзывы 1 по фильму id={}", filmId);
-        return reviewStorage.getFilmReviews(count, filmId);
+        if (filmId >= 0) {
+            return reviewStorage.getFilmReviews(count, filmId);
+        } else {
+            return reviewStorage.getAllReviews(count);
+        }
     }
+
 
     public void addLike(Long reviewId, Long userId, int isPositive) {
         if (reviewStorage.findReviewById(reviewId).isEmpty()) {
