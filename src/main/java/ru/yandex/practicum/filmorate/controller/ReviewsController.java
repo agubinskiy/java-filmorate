@@ -44,7 +44,8 @@ public class ReviewsController {
     }
 
     @GetMapping
-    public List<ReviewDto> getFilmReviews(@RequestParam(defaultValue = "10") int count, @RequestParam Long filmId) {
+    public List<ReviewDto> getFilmReviews(@RequestParam(defaultValue = "10") int count,
+                                          @RequestParam(defaultValue = "-1") Long filmId) {
         log.info("Запрошен отзывы по фильму id={}", filmId);
         return reviewsService.getFilmReviews(count, filmId);
     }
