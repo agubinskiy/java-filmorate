@@ -20,9 +20,7 @@ import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Event;
 
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.EventStorage;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.*;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -43,7 +41,7 @@ public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
 
-    private final DirectorService directorService;
+    private final DirectorStorage directorStorage;
 
     private final FilmComparatorLikes filmComparatorLikes = new FilmComparatorLikes();
     private final FilmComparatorDate filmComparatorDate = new FilmComparatorDate();
@@ -51,11 +49,11 @@ public class FilmService {
     private final EventStorage eventStorage;
 
     @Autowired
-    public FilmService(DirectorService directorService,
+    public FilmService(DirectorStorage directorStorage,
                        @Qualifier("filmDbStorage") FilmStorage filmStorage,
                        @Qualifier("userDbStorage") UserStorage userStorage,
                        EventStorage eventStorage) {
-        this.directorService = directorService;
+        this.directorStorage = directorStorage;
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
         this.eventStorage = eventStorage;
@@ -94,12 +92,12 @@ public class FilmService {
     }
 
 
-    public void getDirectorsFilm(Film film, NewFilmRequest request) {
-        List<DirectorDto> directorsDtoList = directorService.getDirectors();
+    private void getDirectorsFilm(Film film, NewFilmRequest request) {
+        List<Director> directorsList = directorStorage.findAll();
         // Создаем пустую карту для хранения жанров по id
-        Map<Long, DirectorDto> directorMap = new HashMap<>();
+        Map<Long, Director> directorMap = new HashMap<>();
         // Проходим по всем жанрам из списка directorsDtoList
-        for (DirectorDto d : directorsDtoList) {
+        for (Director d : directorsList) {
             // Получаем id режиссёра
             Long id = d.getId();
             // Помещаем жанр в карту с ключом - его id
@@ -107,9 +105,8 @@ public class FilmService {
         }
         List<Director> directors = new ArrayList<>();
         for (DirectorDtoForFilm directorRequest : request.getDirectors()) {
-            DirectorDto directorDto = directorMap.get(directorRequest.getId());
-            if (directorDto != null) {
-                Director director = DirectorMapper.mapToDirectorFilm(directorDto);
+            Director director = directorMap.get(directorRequest.getId());
+            if (director != null) {
                 directors.add(director);
             } else {
                 throw new NotFoundException("Режиссёр с данным id не найден");
@@ -146,8 +143,7 @@ public class FilmService {
     public void updateDirectorsFilm(Film updatedFilm, UpdateFilmRequest request) {
         List<Director> directors = new ArrayList<>();
         for (DirectorDtoForFilm d : request.getDirectors()) {
-            DirectorDto directorDto = directorService.getDirectorById(d.getId());
-            Director director = DirectorMapper.mapToDirectorFilm(directorDto);
+            Director director = directorStorage.findById(d.getId()).orElseThrow();
             directors.add(director);
         }
         // Обновляем связи режиссеров
@@ -223,6 +219,10 @@ public class FilmService {
     }
 
     public List<FilmDto> getDirectorFilms(long directorId) {
+        if (directorStorage.findById(directorId).isEmpty()) {
+            log.warn("Ошибка при поиске фильмов. Режиссёр с id={} не найден", directorId);
+            throw new NotFoundException("Режиссёр с id=" + directorId + " не найден");
+        }
         List<Film> films = filmStorage.getFilmsByIdDirector(directorId);
         return films.stream()
                 .map(FilmMapper::mapToFilmDto)
@@ -230,6 +230,10 @@ public class FilmService {
     }
 
     public List<FilmDto> getFilmsDirectorSortByLikes(long directorId) {
+        if (directorStorage.findById(directorId).isEmpty()) {
+            log.warn("Ошибка при поиске фильмов. Режиссёр с id={} не найден", directorId);
+            throw new NotFoundException("Режиссёр с id=" + directorId + " не найден");
+        }
         return filmStorage.getFilmsByIdDirector(directorId).stream()
                 .sorted(filmComparatorLikes)
                 .map(FilmMapper::mapToFilmDto)
@@ -237,6 +241,10 @@ public class FilmService {
     }
 
     public List<FilmDto> getFilmsDirectorSortByYear(long directorId) {
+        if (directorStorage.findById(directorId).isEmpty()) {
+            log.warn("Ошибка при поиске фильмов. Режиссёр с id={} не найден", directorId);
+            throw new NotFoundException("Режиссёр с id=" + directorId + " не найден");
+        }
         return filmStorage.getFilmsByIdDirector(directorId).stream()
                 .sorted(filmComparatorDate)
                 .map(FilmMapper::mapToFilmDto)

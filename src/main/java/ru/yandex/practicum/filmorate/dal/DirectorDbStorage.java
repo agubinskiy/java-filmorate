@@ -5,12 +5,13 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dal.mappers.DirectorRowMapper;
 import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.storage.*;
 
 import java.util.List;
 import java.util.Optional;
 
 @Repository("directorDbStorage")
-public class DirectorDbStorage extends BaseDbStorage<Director> {
+public class DirectorDbStorage extends BaseDbStorage<Director> implements DirectorStorage {
 
     private static final String INSERT_QUERY = "INSERT INTO directors(name) VALUES (?)";
 
