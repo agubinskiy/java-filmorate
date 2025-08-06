@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.comparator.FilmComparatorLikes;
 import ru.yandex.practicum.filmorate.dto.*;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
-import ru.yandex.practicum.filmorate.mapper.DirectorMapper;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 
 import ru.yandex.practicum.filmorate.model.Director;
