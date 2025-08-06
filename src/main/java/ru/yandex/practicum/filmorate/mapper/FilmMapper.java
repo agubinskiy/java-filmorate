@@ -91,6 +91,8 @@ public final class FilmMapper {
             film.setGenres(request.getGenres().stream()
                     .map(genre -> Genre.fromId(genre.getId()))
                     .toList());
+        } else {
+            film.setGenres(Collections.emptyList());
         }
         if (request.hasRate()) {
             film.setMpa(Rate.fromId(request.getMpa().getId()));
