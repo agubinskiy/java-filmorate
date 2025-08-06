@@ -133,24 +133,8 @@ public class FilmService {
                 });
         log.debug("Запрос на обновление фильма конвертирован в объект класса Film {}", updatedFilm);
         updatedFilm = filmStorage.updateFilm(updatedFilm);
-        if (request.getDirectors() != null) {
-            updateDirectorsFilm(updatedFilm, request);
-        }
         log.debug("Обновление успешно {}", updatedFilm);
         return mapToFilmDto(updatedFilm);
-    }
-
-    public void updateDirectorsFilm(Film updatedFilm, UpdateFilmRequest request) {
-        List<Director> directors = new ArrayList<>();
-        for (DirectorDtoForFilm d : request.getDirectors()) {
-            Director director = directorStorage.findById(d.getId()).orElseThrow();
-            directors.add(director);
-        }
-        // Обновляем связи режиссеров
-        filmStorage.updateFilmDirectors(request.getId(), directors);
-        // Обновляем список режиссеров в объекте фильма
-        updatedFilm.setDirectors(directors);
-
     }
 
     public FilmDto getFilm(Long filmId) {
@@ -204,12 +188,6 @@ public class FilmService {
                 .entityId(filmId)
                 .build());
         return mapToFilmDto(filmStorage.getFilm(filmId).get());
-    }
-
-    public List<FilmDto> getMostLikedFilms(int count) {
-        return filmStorage.getMostLikedFilms(count).stream()
-                .map(FilmMapper::mapToFilmDto)
-                .toList();
     }
 
     public List<FilmDto> searchFilms(String query, SearchBy by) {
@@ -307,7 +285,7 @@ public class FilmService {
         return filmStorage.getCommonFilms(userId, friendId)
                 .stream()
                 .map(FilmMapper::mapToFilmDto)
-                .sorted(Comparator.comparingInt((FilmDto film)  -> film.getLikes().size()).reversed())
+                .sorted(Comparator.comparingInt((FilmDto film) -> film.getLikes().size()).reversed())
                 .toList();
     }
 }

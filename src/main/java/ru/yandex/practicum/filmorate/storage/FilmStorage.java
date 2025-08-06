@@ -34,13 +34,12 @@ public interface FilmStorage {
 
     List<Film> getFilmsByIdDirector(long directorId);
 
-    void updateFilmDirectors(Long filmId, List<Director> directors);
-
     Map<Long, Map<Long, Double>> getAllLikes();
 
     List<Film> getCommonFilms(Long userId, Long friendId);
 
 
     List<Film> searchFilms(String query, SearchBy by);
+
     void removeLike(Long userId, Long filmId);
 }
