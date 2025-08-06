@@ -214,6 +214,7 @@ public class FilmService {
 
     public List<FilmDto> searchFilms(String query, SearchBy by) {
         return filmStorage.searchFilms(query, by).stream()
+                .sorted(filmComparatorLikes)
                 .map(FilmMapper::mapToFilmDto)
                 .toList();
     }
