@@ -20,16 +20,18 @@ public class ReviewsDbStorage {
 
     private static final String INSERT_REVIEW_QUERY = "INSERT INTO Reviews (content, isPositive, userId, filmId) " +
             "VALUES(?, ?, ?, ?)";
-    private static final String UPDATE_REVIEW_QUERY = "UPDATE Reviews SET content = ?, isPositive = ?, userId = ?, filmId = ? " +
+    private static final String UPDATE_REVIEW_QUERY = "UPDATE Reviews SET content = ?, isPositive = ? " +
             "WHERE reviewId = ?";
     private static final String DELETE_REVIEW_QUERY = "DELETE FROM Reviews WHERE reviewId = ? ";
     private static final String GET_REVIEW_QUERY = "SELECT * FROM Reviews WHERE reviewId = ? ";
-    private static final String GET_REVIEWBYFILM_QUERY = "SELECT * FROM Reviews WHERE filmId = ? LIMIT ?";
+    private static final String GET_REVIEWBYFILM_QUERY = "SELECT * FROM Reviews WHERE filmId = ? ORDER BY useful desc LIMIT ?";
+    private static final String GET_ALLREVIEWS_QUERY = "SELECT * FROM Reviews ORDER BY useful desc LIMIT ?";
     private static final String ADD_LIKE_QUERY = "INSERT INTO ReviewsScore (isPositive, userId, reviewsId) " +
             "VALUES(?, ?, ?)";
     private static final String DELETE_LIKE_QUERY = "DELETE FROM ReviewsScore WHERE reviewsId = ? and userId = ?";
     private static final String UPDATE_USEFUL_QUERY = "UPDATE Reviews SET " +
             "useful = (SELECT NVL(SUM(s.IsPositive), 0) FROM REVIEWSSCORE s where s.reviewsId = ?) WHERE reviewId = ? ";
+
 
 
     public ReviewDto addReview(ReviewDto reviewDto) {
@@ -52,7 +54,7 @@ public class ReviewsDbStorage {
     public ReviewDto updateReview(ReviewDto review) {
 
         jdbcTemplate.update(UPDATE_REVIEW_QUERY,
-                review.getContent(), review.getIsPositive(), review.getUserId(), review.getFilmId(), review.getReviewId());
+                review.getContent(), review.getIsPositive(), review.getReviewId());
         return findReviewById(review.getReviewId()).orElse(null);
     }
 
@@ -73,6 +75,11 @@ public class ReviewsDbStorage {
     public List<ReviewDto> getFilmReviews(Integer count, Long filmId) {
         ReviewRowMapper mapper = new ReviewRowMapper();
         return jdbcTemplate.query(GET_REVIEWBYFILM_QUERY, mapper, filmId, count);
+    }
+
+    public List<ReviewDto> getAllReviews(Integer count) {
+        ReviewRowMapper mapper = new ReviewRowMapper();
+        return jdbcTemplate.query(GET_ALLREVIEWS_QUERY, mapper, count);
     }
 
     public void addLike(int isPositive, Long reviewId, Long userId) {
