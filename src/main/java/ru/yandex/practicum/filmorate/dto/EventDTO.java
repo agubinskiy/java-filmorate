@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 public class EventDTO {
     @NotBlank
-    private String eventId;
+    private long eventId;
     @NotBlank
     private long entityId;
     @NotBlank
