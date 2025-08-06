@@ -97,6 +97,18 @@ public final class FilmMapper {
         if (request.hasRate()) {
             film.setMpa(Rate.fromId(request.getMpa().getId()));
         }
+        if (request.hasDirectors()) {
+            List<Director> directors = request.getDirectors().stream()
+                    .map(directorDto -> {
+                        Director director = new Director();
+                        director.setId(directorDto.getId()); // устанавливаем только id
+                        return director;
+                    })
+                    .collect(Collectors.toList());
+            film.setDirectors(directors);
+        } else {
+            film.setDirectors(Collections.emptyList());
+        }
         return film;
     }
 }
