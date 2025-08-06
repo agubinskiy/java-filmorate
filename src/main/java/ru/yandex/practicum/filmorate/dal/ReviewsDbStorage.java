@@ -33,6 +33,7 @@ public class ReviewsDbStorage {
             "useful = (SELECT NVL(SUM(s.IsPositive), 0) FROM REVIEWSSCORE s where s.reviewsId = ?) WHERE reviewId = ? ";
 
 
+
     public ReviewDto addReview(ReviewDto reviewDto) {
 
         KeyHolder keyHolder = new GeneratedKeyHolder();

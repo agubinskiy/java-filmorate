@@ -71,10 +71,12 @@ CREATE TABLE IF NOT EXISTS ReviewsScore (
     isPositive  INTEGER DEFAULT 0,
     userId BIGINT REFERENCES Users ON DELETE CASCADE,
     reviewsId BIGINT REFERENCES Reviews ON DELETE CASCADE
+
 );
 
 CREATE TABLE IF NOT EXISTS film_directors (
     film_id BIGINT REFERENCES films (id) ON DELETE CASCADE,
     director_id BIGINT REFERENCES directors (directors_id) ON DELETE CASCADE,
     PRIMARY KEY (film_id, director_id)
+
 );

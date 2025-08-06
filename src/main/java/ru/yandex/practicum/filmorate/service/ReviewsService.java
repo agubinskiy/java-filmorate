@@ -112,6 +112,7 @@ public class ReviewsService {
         }
     }
 
+
     public void addLike(Long reviewId, Long userId, int isPositive) {
         if (reviewStorage.findReviewById(reviewId).isEmpty()) {
             log.warn("Ошибка при лайке отзыва. Отзыв с id={} не найден", reviewId);
