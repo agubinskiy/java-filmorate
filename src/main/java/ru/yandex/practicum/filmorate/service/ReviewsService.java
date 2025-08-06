@@ -70,7 +70,7 @@ public class ReviewsService {
             throw new NotFoundException("Фильм с id=" + review.getFilmId() + " не найден");
         }
         eventStorage.addEvent(Event.builder()
-                .userId(review.getUserId())
+                .userId(reviewStorage.findReviewById(review.getReviewId()).get().getUserId())
                 .eventType(EventType.REVIEW)
                 .operation(OperationType.UPDATE)
                 .timestamp(Timestamp.from(Instant.now()))
@@ -124,13 +124,6 @@ public class ReviewsService {
         }
         reviewStorage.deleteLike(reviewId, userId);
         reviewStorage.addLike(isPositive, reviewId, userId);
-        eventStorage.addEvent(Event.builder()
-                .userId(userId)
-                .eventType(EventType.LIKE)
-                .operation(OperationType.ADD)
-                .timestamp(Timestamp.from(Instant.now()))
-                .entityId(reviewId)
-                .build());
     }
 
     public void deleteLike(Long reviewId, Long userId) {
