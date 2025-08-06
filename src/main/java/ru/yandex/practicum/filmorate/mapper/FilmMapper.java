@@ -6,13 +6,16 @@ import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.dto.GenreDtoForFilm;
 import ru.yandex.practicum.filmorate.dto.NewFilmRequest;
 import ru.yandex.practicum.filmorate.dto.UpdateFilmRequest;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rate;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class FilmMapper {
@@ -32,6 +35,17 @@ public final class FilmMapper {
         );
 
         film.setMpa(Rate.fromId(request.getMpa().getId()));
+
+        if (request.getDirectors() != null) {
+            List<Director> directors = request.getDirectors().stream()
+                    .map(directorDto -> {
+                        Director director = new Director();
+                        director.setId(directorDto.getId()); // устанавливаем только id
+                        return director;
+                    })
+                    .collect(Collectors.toList());
+            film.setDirectors(directors);
+        }
 
         return film;
     }
@@ -53,6 +67,10 @@ public final class FilmMapper {
         dto.setMpa(RateMapper.mapToRateDto(film.getMpa()));
         dto.setLikes(film.getLikes());
 
+        if (film.getDirectors() != null) {
+            dto.setDirectors(film.getDirectors());
+        }
+
         return dto;
     }
 
@@ -73,6 +91,8 @@ public final class FilmMapper {
             film.setGenres(request.getGenres().stream()
                     .map(genre -> Genre.fromId(genre.getId()))
                     .toList());
+        } else {
+            film.setGenres(Collections.emptyList());
         }
         if (request.hasRate()) {
             film.setMpa(Rate.fromId(request.getMpa().getId()));

@@ -3,14 +3,12 @@ package ru.yandex.practicum.filmorate.storage;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.dto.SearchBy;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+
 
 @Component
 @Slf4j
@@ -57,5 +55,85 @@ public class InMemoryFilmStorage implements FilmStorage {
         Film film = getFilm(filmId).orElseThrow();
         film.getLikes().add(userId);
         return film;
+    }
+
+    @Override
+    public void deleteFilm(Long filmId) {
+
+    }
+
+    @Override
+    public List<Film> getMostLikedFilmsByGenreYear(int count, long genreId, int year) {
+        return null;
+    }
+
+    @Override
+    public List<Film> getMostLikedFilmsByGenre(int count, long genreId) {
+        return null;
+    }
+
+    @Override
+    public List<Film> getMostLikedFilmsByYear(int count, int year) {
+        return null;
+    }
+
+    @Override
+
+    public void saveFilmDirectors(long filmId, List<Director> directors) {
+    }
+
+    @Override
+    public List<Film> getFilmsByIdDirector(long directorId) {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public void updateFilmDirectors(Long filmId, List<Director> directors) {
+
+    }
+
+    @Override
+    public Map<Long, Map<Long, Double>> getAllLikes() {
+        Map<Long, Map<Long, Double>> result = new HashMap<>();
+        for (Film film : films.values()) {
+            Set<Long> likes = film.getLikes();
+            if (likes != null) {
+                for (Long userId : likes) {
+                    result.computeIfAbsent(userId, k -> new HashMap<>()).put(film.getId(), 1.0);
+                }
+            }
+        }
+        return result;
+    }
+
+    private List<Long> getUserLikes(Long userId) {
+        return films.entrySet().stream()
+                .filter(entry -> entry.getValue().getLikes().contains(userId))
+                .map(Map.Entry::getKey)
+                .toList();
+    }
+
+    @Override
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+        //копируем список фильмов пользователя
+        List<Long> commonFilms = new ArrayList<>(getUserLikes(userId));
+        //оставляем только пересечения со списком фильмов друга
+        commonFilms.retainAll(getUserLikes(friendId));
+        return null;
+    }
+
+    @Override
+    public void removeLike(Long userId, Long filmId) {
+
+    }
+
+    @Override
+    public List<Film> searchFilms(String query, SearchBy by) {
+        if (by.equals(SearchBy.TITLE)) {
+            return films.values().stream()
+                    .filter(film -> film.getName().toLowerCase().contains(query))
+                    .toList();
+        }
+        return Collections.emptyList();
     }
 }

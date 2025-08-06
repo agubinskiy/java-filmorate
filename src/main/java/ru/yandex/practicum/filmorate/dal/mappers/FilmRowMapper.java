@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.dal.mappers;
 
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rate;
@@ -17,10 +18,12 @@ import java.util.Set;
 public class FilmRowMapper implements RowMapper<Film> {
     private final Map<Long, List<Genre>> genres;
     private final Map<Long, Set<Long>> likes;
+    private final Map<Long, List<Director>> directorMapping;
 
-    public FilmRowMapper(Map<Long, List<Genre>> genres, Map<Long, Set<Long>> likes) {
+    public FilmRowMapper(Map<Long, List<Genre>> genres, Map<Long, Set<Long>> likes, Map<Long, List<Director>> directorMapping) {
         this.genres = genres;
         this.likes = likes;
+        this.directorMapping = directorMapping;
     }
 
     @Override
@@ -37,6 +40,8 @@ public class FilmRowMapper implements RowMapper<Film> {
         film.setGenres(genres.getOrDefault(filmId, Collections.emptyList()));
         film.setMpa(Rate.fromId(resultSet.getInt("rate_id")));
         film.setLikes(likes.getOrDefault(filmId, Collections.emptySet()));
+
+        film.setDirectors(directorMapping.getOrDefault(filmId, Collections.emptyList()));
 
         return film;
     }
