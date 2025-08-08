@@ -1,8 +1,8 @@
 package ru.yandex.practicum.filmorate.dal.mappers;
 
 import org.springframework.jdbc.core.RowMapper;
-import ru.yandex.practicum.filmorate.dto.EventType;
-import ru.yandex.practicum.filmorate.dto.OperationType;
+import ru.yandex.practicum.filmorate.model.EventType;
+import ru.yandex.practicum.filmorate.model.OperationType;
 import ru.yandex.practicum.filmorate.model.Event;
 
 import java.sql.ResultSet;

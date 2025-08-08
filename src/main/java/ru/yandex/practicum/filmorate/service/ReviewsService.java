@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dal.EventDBStorage;
 import ru.yandex.practicum.filmorate.dal.ReviewsDbStorage;
-import ru.yandex.practicum.filmorate.dto.EventType;
-import ru.yandex.practicum.filmorate.dto.OperationType;
+import ru.yandex.practicum.filmorate.model.EventType;
+import ru.yandex.practicum.filmorate.model.OperationType;
 import ru.yandex.practicum.filmorate.dto.ReviewDto;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Event;
@@ -69,8 +69,12 @@ public class ReviewsService {
             log.warn("Ошибка при обновлении отзыва. Фильм с id={} не найден", review.getFilmId());
             throw new NotFoundException("Фильм с id=" + review.getFilmId() + " не найден");
         }
+        Optional<ReviewDto> oldReview = reviewStorage.findReviewById(review.getReviewId());
+        if (oldReview.isEmpty()) {
+            throw new NotFoundException("Отзыв с id=" + review.getReviewId() + " не найден");
+        }
         eventStorage.addEvent(Event.builder()
-                .userId(reviewStorage.findReviewById(review.getReviewId()).get().getUserId())
+                .userId((oldReview.get().getUserId()))
                 .eventType(EventType.REVIEW)
                 .operation(OperationType.UPDATE)
                 .timestamp(Timestamp.from(Instant.now()))

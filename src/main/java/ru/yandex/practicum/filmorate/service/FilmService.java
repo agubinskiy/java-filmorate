@@ -14,11 +14,8 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 
-import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.model.*;
 
-import ru.yandex.practicum.filmorate.model.Event;
-
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.*;
 
 import java.sql.Timestamp;
@@ -278,8 +275,8 @@ public class FilmService {
         if (userStorage.getUser(userId).isEmpty()) {
             log.warn("Ошибка при запросе общих фильмов. Пользователь с userId {} не найден", userId);
         }
-        if (userStorage.getUser(userId).isEmpty()) {
-            log.warn("Ошибка при запросе общих фильмов. Пользователь с friendId {} не найден", userId);
+        if (userStorage.getUser(friendId).isEmpty()) {
+            log.warn("Ошибка при запросе общих фильмов. Пользователь с friendId {} не найден", friendId);
         }
         return filmStorage.getCommonFilms(userId, friendId)
                 .stream()

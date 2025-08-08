@@ -2,6 +2,8 @@ package ru.yandex.practicum.filmorate.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import ru.yandex.practicum.filmorate.model.EventType;
+import ru.yandex.practicum.filmorate.model.OperationType;
 
 @Data
 public class EventDTO {
