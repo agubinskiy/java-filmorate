@@ -88,11 +88,6 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void updateFilmDirectors(Long filmId, List<Director> directors) {
-
-    }
-
-    @Override
     public Map<Long, Map<Long, Double>> getAllLikes() {
         Map<Long, Map<Long, Double>> result = new HashMap<>();
         for (Film film : films.values()) {

@@ -37,9 +37,6 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
             "duration = ?, rate_id = ? WHERE id = ?";
     private static final String DELETE_GENRE_QUERY = "DELETE FROM FilmGenres WHERE film_id = ?";
     private static final String INSERT_LIKE_QUERY = "INSERT INTO Likes(film_id, user_id) VALUES (?, ?)";
-    private static final String FIND_USERS_LIKES = "SELECT film_id FROM Likes WHERE user_id = ?";
-    // private static final String FIND_COMMON_FILMS = "SELECT film_id FROM Likes WHERE user_id = ? INTERSECT " +
-     //       "SELECT film_id FROM Likes WHERE user_id = ?";
     private static final String FIND_COMMON_FILMS = "SELECT f.* FROM films f JOIN ( SELECT film_id FROM Likes WHERE user_id = ? " +
             "INTERSECT SELECT film_id  FROM Likes WHERE user_id = ?) common_likes (film_id) ON f.id = common_likes.film_id;";
     private static final String DELETE_FILM_QUERY = "DELETE FROM Films WHERE id = ?";
@@ -57,7 +54,6 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
             "SELECT f.*, count(l.user_id) as likes_count FROM Films f JOIN Likes l ON f.id = l.film_id " +
                     "WHERE exists (select 1 from FilmGenres where film_id = f.id and genre_id = ?)" +
                     "GROUP BY f.id ORDER BY likes_count DESC LIMIT ?";
-    private static final String INSERT_DIRECTOR_QUERY = "INSERT INTO film_directors(film_id, director_id) VALUES(?, ?)";
     private static final String FIND_BY_ID_DIRECTOR_FILM =
             "SELECT f.* " +
                     "FROM Films f " +
@@ -71,10 +67,7 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
     }
 
     public List<Film> getFilmsByIdDirector(long directorId) {
-        Map<Long, List<Genre>> genres = findGenresForFilms();
-        Map<Long, Set<Long>> likes = findLikesForFilms();
-        Map<Long, List<Director>> directors = findDirectorsForFilms();
-        RowMapper<Film> mapper = new FilmRowMapper(genres, likes, directors);
+        RowMapper<Film> mapper = prepareFilms();
         List<Film> films = jdbc.query(FIND_BY_ID_DIRECTOR_FILM, mapper, directorId);
         return films;
     }
@@ -95,10 +88,7 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
     }
 
     public List<Film> findAllFilms() {
-        Map<Long, List<Genre>> genres = findGenresForFilms();
-        Map<Long, Set<Long>> likes = findLikesForFilms();
-        Map<Long, List<Director>> directors = findDirectorsForFilms();
-        RowMapper<Film> mapper = new FilmRowMapper(genres, likes, directors);
+        RowMapper<Film> mapper = prepareFilms();
         return findMany(FIND_ALL_QUERY, mapper);
     }
 
@@ -116,10 +106,7 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
         if (filmIds.isEmpty()) {
             return Collections.emptyList();
         }
-        Map<Long, List<Genre>> genres = findGenresForFilms(filmIds);
-        Map<Long, Set<Long>> likes = findLikesForFilms(filmIds);
-        Map<Long, List<Director>> directors = findDirectorsForFilms();
-        RowMapper<Film> mapper = new FilmRowMapper(genres, likes, directors);
+        RowMapper<Film> mapper = prepareFilms(filmIds);
         return findMany(FIND_MOST_LIKED_QUERY, mapper, count);
     }
 
@@ -154,7 +141,7 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
             batchArgs.add(args);
         }
         // Выполняем пакетную вставку
-        jdbc.batchUpdate(INSERT_DIRECTOR_QUERY, batchArgs);
+        jdbc.batchUpdate(INSERT_FILM_DIRECTORS, batchArgs);
     }
 
     public Film updateFilm(Film film) {
@@ -169,20 +156,13 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
         );
         delete(DELETE_GENRE_QUERY, film.getId());
         film.getGenres().forEach(genre -> insert(INSERT_GENRE_QUERY, film.getId(), genre.getId()));
-        return film;
-    }
-
-    // Обновление режиссёров
-    public void updateFilmDirectors(Long filmId, List<Director> directors) {
-        // Удаляем прошлые связи
-        jdbc.update(DELETE_FILM_DIRECTORS, filmId);
-
-        // Добавляем новые связи
-        if (directors != null && !directors.isEmpty()) {
-            for (Director director : directors) {
-                jdbc.update(INSERT_FILM_DIRECTORS, filmId, director.getId());
+        delete(DELETE_FILM_DIRECTORS, film.getId());
+        if (film.getDirectors() != null && !film.getDirectors().isEmpty()) {
+            for (Director director : film.getDirectors()) {
+                jdbc.update(INSERT_FILM_DIRECTORS, film.getId(), director.getId());
             }
         }
+        return film;
     }
 
     public Film addLike(Long filmId, Long userId) {
@@ -214,10 +194,7 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
     }
 
     public List<Film> getCommonFilms(Long userId, Long friendId) {
-        Map<Long, List<Genre>> genres = findGenresForFilms();
-        Map<Long, Set<Long>> likes = findLikesForFilms();
-        Map<Long, List<Director>> directors = findDirectorsForFilms();
-        RowMapper<Film> mapper = new FilmRowMapper(genres, likes,directors);
+        RowMapper<Film> mapper = prepareFilms();
         return findMany(FIND_COMMON_FILMS, mapper, userId, friendId);
     }
 
@@ -253,10 +230,7 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
         if (filmIds.isEmpty()) {
             return Collections.emptyList();
         }
-        Map<Long, List<Genre>> genres = findGenresForFilms(filmIds);
-        Map<Long, Set<Long>> likes = findLikesForFilms(filmIds);
-        Map<Long, List<Director>> directors = findDirectorsForFilms();
-        RowMapper<Film> mapper = new FilmRowMapper(genres, likes, directors);
+        RowMapper<Film> mapper = prepareFilms(filmIds);
         return findMany(searchQuery, mapper, params);
     }
 
@@ -312,10 +286,7 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
         if (filmIds.isEmpty()) {
             return Collections.emptyList();
         }
-        Map<Long, List<Genre>> genres = findGenresForFilms(filmIds);
-        Map<Long, Set<Long>> likes = findLikesForFilms(filmIds);
-        Map<Long, List<Director>> directors = findDirectorsForFilms();
-        RowMapper<Film> mapper = new FilmRowMapper(genres, likes, directors);
+        RowMapper<Film> mapper = prepareFilms(filmIds);
         return findMany(FIND_MOST_LIKED_BY_GENRE_YEAR_QUERY, mapper, genreId, year, count);
     }
 
@@ -325,10 +296,7 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
         if (filmIds.isEmpty()) {
             return Collections.emptyList();
         }
-        Map<Long, List<Genre>> genres = findGenresForFilms(filmIds);
-        Map<Long, Set<Long>> likes = findLikesForFilms(filmIds);
-        Map<Long, List<Director>> directors = findDirectorsForFilms();
-        RowMapper<Film> mapper = new FilmRowMapper(genres, likes, directors);
+        RowMapper<Film> mapper = prepareFilms(filmIds);
         return findMany(FIND_MOST_LIKED_BY_GENRE_QUERY, mapper, genreId, count);
     }
 
@@ -338,10 +306,21 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
         if (filmIds.isEmpty()) {
             return Collections.emptyList();
         }
+        RowMapper<Film> mapper = prepareFilms(filmIds);
+        return findMany(FIND_MOST_LIKED_BY_YEAR_QUERY, mapper, year, count);
+    }
+
+    private RowMapper<Film> prepareFilms(List<Long> filmIds) {
         Map<Long, List<Genre>> genres = findGenresForFilms(filmIds);
         Map<Long, Set<Long>> likes = findLikesForFilms(filmIds);
         Map<Long, List<Director>> directors = findDirectorsForFilms();
-        RowMapper<Film> mapper = new FilmRowMapper(genres, likes, directors);
-        return findMany(FIND_MOST_LIKED_BY_YEAR_QUERY, mapper, year, count);
+        return new FilmRowMapper(genres, likes, directors);
+    }
+
+    private RowMapper<Film> prepareFilms() {
+        Map<Long, List<Genre>> genres = findGenresForFilms();
+        Map<Long, Set<Long>> likes = findLikesForFilms();
+        Map<Long, List<Director>> directors = findDirectorsForFilms();
+        return new FilmRowMapper(genres, likes, directors);
     }
 }
