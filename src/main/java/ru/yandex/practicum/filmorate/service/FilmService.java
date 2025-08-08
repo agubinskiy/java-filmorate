@@ -19,12 +19,12 @@ import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.model.Event;
 
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.enums.*;
 import ru.yandex.practicum.filmorate.storage.*;
 
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.*;
 import java.util.stream.Collectors;
 import java.util.Collection;
 import java.util.Comparator;
