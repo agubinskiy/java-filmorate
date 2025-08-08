@@ -21,7 +21,7 @@ public class ReviewsController {
 
     @PostMapping
     public ReviewDto addReview(@Valid @RequestBody ReviewDto review) {
-        log.info("Добавляется отзыв");
+        log.info("Добавляется отзыв на фильм {} пользователем {}", review.getFilmId(), review.getUserId());
         return reviewsService.addReview(review);
     }
 
