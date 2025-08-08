@@ -24,6 +24,7 @@ public class Film {
 
     @NotBlank(message = "Название фильма не может быть пустым",
             groups = {CreateValidation.class, UpdateValidation.class})
+    @Size(max = 40, message = "Название фильма не может быть длиннее 40 символов")
     private String name;
 
     @Size(max = 200, message = "Описание фильма не может быть длиннее 200 символов",

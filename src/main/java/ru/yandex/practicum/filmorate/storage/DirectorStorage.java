@@ -1,19 +1,19 @@
 package ru.yandex.practicum.filmorate.storage;
 
-import org.springframework.jdbc.core.*;
-import ru.yandex.practicum.filmorate.dal.mappers.*;
 import ru.yandex.practicum.filmorate.model.*;
 
 import java.util.*;
 
 public interface DirectorStorage {
-    public List<Director> findAll();
+    List<Director> findAll();
 
-    public Optional<Director> findById(long id);
+    Optional<Director> findById(long id);
 
-    public boolean deleteFilmLike(long directorId);
+    List<Director> findByIds(List<Long> ids);
 
-    public Director save(Director director);
+    boolean deleteFilmDirector(long directorId);
 
-    public Director update(Director director);
+    Director save(Director director);
+
+    Director update(Director director);
 }

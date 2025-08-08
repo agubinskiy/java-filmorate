@@ -1,10 +1,7 @@
 package ru.yandex.practicum.filmorate.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.PastOrPresent;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -21,8 +18,10 @@ public class UserDto {
 
     @NotBlank(message = "Логин не может быть пустым")
     @Pattern(regexp = "^\\S+$", message = "Логин не должен содержать пробелов")
+    @Size(max = 40, message = "Логин пользователя не может быть длиннее 40 символов")
     private String login;
 
+    @Size(max = 40, message = "Логин пользователя не может быть длиннее 40 символов")
     private String name;
 
     @PastOrPresent(message = "Некорректная дата рождения")

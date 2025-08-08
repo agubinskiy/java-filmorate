@@ -1,12 +1,13 @@
 package ru.yandex.practicum.filmorate.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import ru.yandex.practicum.filmorate.model.CreateValidation;
 
 @Data
 public class NewDirectorRequest {
 
-    @NotBlank(message = "Имя режиссёра не может быть пустым", groups = CreateValidation.class)
+    @NotBlank(message = "Имя режиссёра не может быть пустым")
+    @Size(max = 100, message = "Имя режиссёра не может превышать 100 символов")
     private String name;
 }

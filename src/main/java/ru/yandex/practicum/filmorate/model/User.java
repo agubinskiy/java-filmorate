@@ -1,10 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PastOrPresent;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,8 +26,10 @@ public class User {
     @NotBlank(message = "Логин не может быть пустым", groups = {CreateValidation.class, UpdateValidation.class})
     @Pattern(regexp = "^\\S+$", message = "Логин не должен содержать пробелов",
             groups = {CreateValidation.class, UpdateValidation.class})
+    @Size(max = 40, message = "Логин пользователя не может быть длиннее 40 символов")
     private String login;
 
+    @Size(max = 40, message = "Имя пользователя не может быть длиннее 40 символов")
     private String name;
 
     @PastOrPresent(message = "Некорректная дата рождения", groups = {CreateValidation.class, UpdateValidation.class})

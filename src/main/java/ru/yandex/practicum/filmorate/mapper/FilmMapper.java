@@ -68,7 +68,11 @@ public final class FilmMapper {
         dto.setLikes(film.getLikes());
 
         if (film.getDirectors() != null) {
-            dto.setDirectors(film.getDirectors());
+            dto.setDirectors(film.getDirectors().stream()
+                    .sorted(Comparator.comparing(Director::getId))
+                    .map(DirectorMapper::mapToDirectorDto)
+                    .toList()
+            );
         }
 
         return dto;

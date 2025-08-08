@@ -17,14 +17,6 @@ public final class DirectorMapper {
         return director;
     }
 
-    public static Director mapToDirectorFilm(DirectorDto request) {
-        Director director = new Director();
-        director.setId(request.getId());
-        director.setName(request.getName());
-
-        return director;
-    }
-
     public static DirectorDto mapToDirectorDto(Director director) {
         DirectorDto dto = new DirectorDto();
         dto.setId(director.getId());
