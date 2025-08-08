@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.Data;
-import ru.yandex.practicum.filmorate.model.UpdateValidation;
 
 @Data
 public class UpdateDirectorRequest {
