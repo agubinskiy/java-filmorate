@@ -7,8 +7,7 @@ import ru.yandex.practicum.filmorate.dal.mappers.DirectorRowMapper;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.*;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Repository("directorDbStorage")
 public class DirectorDbStorage extends BaseDbStorage<Director> implements DirectorStorage {
@@ -40,7 +39,24 @@ public class DirectorDbStorage extends BaseDbStorage<Director> implements Direct
         return findOne(FIND_BY_ID_QUERY, mapper, id);
     }
 
-    public boolean deleteFilmLike(long directorId) {
+    public List<Director> findByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        String directorsIds = "";
+        for (int i = 0; i < ids.size(); i++) {
+            directorsIds += "?";
+            if (i < ids.size() - 1) {
+                directorsIds += ",";
+            }
+        }
+
+        String listDirectorsId = "SELECT * FROM directors WHERE directors_id IN (" + directorsIds + ")";
+        return jdbc.query(listDirectorsId, ids.toArray(), new DirectorRowMapper());
+    }
+
+    public boolean deleteFilmDirector(long directorId) {
         return delete(DELETE_DIRECTOR, directorId);
     }
 

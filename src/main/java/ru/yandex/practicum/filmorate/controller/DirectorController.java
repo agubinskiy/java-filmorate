@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.*;
 import jakarta.validation.constraints.Positive;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -7,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dto.DirectorDto;
 import ru.yandex.practicum.filmorate.dto.NewDirectorRequest;
 import ru.yandex.practicum.filmorate.dto.UpdateDirectorRequest;
-import ru.yandex.practicum.filmorate.model.CreateValidation;
 import ru.yandex.practicum.filmorate.service.DirectorService;
 
 import java.util.List;
@@ -25,7 +25,7 @@ public class DirectorController {
     }
 
     @PostMapping
-    public DirectorDto create(@Validated(CreateValidation.class) @RequestBody NewDirectorRequest directorRequest) {
+    public DirectorDto create(@Valid @RequestBody NewDirectorRequest directorRequest) {
         return directorService.createDirector(directorRequest);
     }
 
@@ -40,7 +40,7 @@ public class DirectorController {
     }
 
     @PutMapping
-    public DirectorDto updateDirector(@Validated(CreateValidation.class) @RequestBody UpdateDirectorRequest request) {
+    public DirectorDto updateDirector(@Valid @RequestBody UpdateDirectorRequest request) {
         return directorService.updateDirector(request);
     }
 

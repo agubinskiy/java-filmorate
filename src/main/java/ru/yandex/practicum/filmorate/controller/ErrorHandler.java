@@ -32,7 +32,7 @@ public class ErrorHandler {
         );
     }
 
-    @ExceptionHandler({ValidationException.class, MethodArgumentNotValidException.class})
+    @ExceptionHandler({ValidationException.class, MethodArgumentNotValidException.class, HttpMessageNotReadableException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidation(final Exception e) {
         log.debug("Ошибка валидации. {}", e.getMessage());
@@ -41,19 +41,14 @@ public class ErrorHandler {
                     "Некорректное значение параметра " + ((ValidationException) e).getParameter(),
                     ((ValidationException) e).getReason()
             );
+        } else if (e.getClass() == HttpMessageNotReadableException.class) {
+            return new ErrorResponse("Некорректный запрос", "Тело запроса отсутствует");
         } else {
             return new ErrorResponse(
                     "Некорректное значение параметра " + ((MethodArgumentNotValidException) e).getParameter(),
                     e.getMessage()
             );
         }
-    }
-
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleHttpMessageNotReadable(final HttpMessageNotReadableException e) {
-        log.debug("Ошибка чтения тела запроса: {}", e.getMessage());
-        return new ErrorResponse("Некорректный запрос", "Тело запроса отсутствует");
     }
 
     @ExceptionHandler

@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import ru.yandex.practicum.filmorate.model.Director;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -18,6 +17,7 @@ public class FilmDto {
     private Long id;
 
     @NotBlank(message = "Название фильма не может быть пустым")
+    @Size(max = 40, message = "Название фильма не может быть длиннее 40 символов")
     private String name;
 
     @Size(max = 200, message = "Описание фильма не может быть длиннее 200 символов")
@@ -36,5 +36,5 @@ public class FilmDto {
     private Set<Long> likes;
 
     @NotEmpty(message = "Должен быть указан хотя бы один режиссёр")
-    private List<Director> directors;
+    private List<DirectorDto> directors;
 }

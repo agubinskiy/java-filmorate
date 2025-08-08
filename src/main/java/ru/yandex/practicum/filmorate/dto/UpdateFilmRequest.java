@@ -15,6 +15,7 @@ public class UpdateFilmRequest {
     @NotNull(message = "Id не может быть пустым", groups = UpdateValidation.class)
     private Long id;
 
+    @Size(max = 40, message = "Название фильма не может быть длиннее 40 символов", groups = UpdateValidation.class)
     private String name;
 
     @Size(max = 200, message = "Описание фильма не может быть длиннее 200 символов",

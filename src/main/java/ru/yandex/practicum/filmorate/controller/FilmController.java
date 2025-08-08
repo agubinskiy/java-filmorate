@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.dto.NewFilmRequest;
-import ru.yandex.practicum.filmorate.dto.SearchBy;
+import ru.yandex.practicum.filmorate.model.enums.SearchBy;
 import ru.yandex.practicum.filmorate.dto.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.model.CreateValidation;
 import ru.yandex.practicum.filmorate.model.UpdateValidation;
@@ -43,19 +43,12 @@ public class FilmController {
     @GetMapping("/{filmId}")
     public FilmDto getFilm(@PathVariable Long filmId) {
         log.info("Запрошена информация по фильму id={}", filmId);
-        log.debug("Иниформация: {}", filmService.getFilm(filmId));
         return filmService.getFilm(filmId);
     }
 
-    /*@GetMapping("/popular")
-    public List<FilmDto> getMostLikedFilms(@RequestParam(defaultValue = "10") int count) {
-        log.info("Запрошен список из {} самых популярных фильмов", count);
-        return filmService.getMostLikedFilms(count);
-    }*/
-
     @GetMapping("/search")
     public List<FilmDto> searchFilms(@RequestParam String query, @RequestParam String by) {
-        log.info("Запрошен поиск фильмов");
+        log.info("Запрошен поиск фильмов. Поиск по значению {}, по параметрам {}", query, by);
         return filmService.searchFilms(query, SearchBy.fromString(by));
     }
 

@@ -19,12 +19,12 @@ import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Event;
 
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.enums.*;
 import ru.yandex.practicum.filmorate.storage.*;
 
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.*;
 import java.util.stream.Collectors;
 import java.util.Collection;
 import java.util.Comparator;
@@ -92,25 +92,14 @@ public class FilmService {
 
 
     private void getDirectorsFilm(Film film, NewFilmRequest request) {
-        List<Director> directorsList = directorStorage.findAll();
-        // Создаем пустую карту для хранения жанров по id
-        Map<Long, Director> directorMap = new HashMap<>();
-        // Проходим по всем жанрам из списка directorsDtoList
-        for (Director d : directorsList) {
-            // Получаем id режиссёра
-            Long id = d.getId();
-            // Помещаем жанр в карту с ключом - его id
-            directorMap.put(id, d);
-        }
-        List<Director> directors = new ArrayList<>();
-        for (DirectorDtoForFilm directorRequest : request.getDirectors()) {
-            Director director = directorMap.get(directorRequest.getId());
-            if (director != null) {
-                directors.add(director);
-            } else {
-                throw new NotFoundException("Режиссёр с данным id не найден");
-            }
-        }
+
+        List<Long> requestedDirectorIds = request.getDirectors()
+                .stream()
+                .map(DirectorDtoForFilm::getId)
+                .collect(Collectors.toList());
+
+        List<Director> directors = directorStorage.findByIds(requestedDirectorIds);
+
         film.setDirectors(directors);
         filmStorage.saveFilmDirectors(film.getId(), directors);
     }
@@ -197,10 +186,7 @@ public class FilmService {
     }
 
     public List<FilmDto> getDirectorFilms(long directorId) {
-        if (directorStorage.findById(directorId).isEmpty()) {
-            log.warn("Ошибка при поиске фильмов. Режиссёр с id={} не найден", directorId);
-            throw new NotFoundException("Режиссёр с id=" + directorId + " не найден");
-        }
+        validateDirector(directorId);
         List<Film> films = filmStorage.getFilmsByIdDirector(directorId);
         return films.stream()
                 .map(FilmMapper::mapToFilmDto)
@@ -208,10 +194,7 @@ public class FilmService {
     }
 
     public List<FilmDto> getFilmsDirectorSortByLikes(long directorId) {
-        if (directorStorage.findById(directorId).isEmpty()) {
-            log.warn("Ошибка при поиске фильмов. Режиссёр с id={} не найден", directorId);
-            throw new NotFoundException("Режиссёр с id=" + directorId + " не найден");
-        }
+        validateDirector(directorId);
         return filmStorage.getFilmsByIdDirector(directorId).stream()
                 .sorted(filmComparatorLikes)
                 .map(FilmMapper::mapToFilmDto)
@@ -219,10 +202,7 @@ public class FilmService {
     }
 
     public List<FilmDto> getFilmsDirectorSortByYear(long directorId) {
-        if (directorStorage.findById(directorId).isEmpty()) {
-            log.warn("Ошибка при поиске фильмов. Режиссёр с id={} не найден", directorId);
-            throw new NotFoundException("Режиссёр с id=" + directorId + " не найден");
-        }
+        validateDirector(directorId);
         return filmStorage.getFilmsByIdDirector(directorId).stream()
                 .sorted(filmComparatorDate)
                 .map(FilmMapper::mapToFilmDto)
@@ -286,5 +266,12 @@ public class FilmService {
                 .map(FilmMapper::mapToFilmDto)
                 .sorted(Comparator.comparingInt((FilmDto film) -> film.getLikes().size()).reversed())
                 .toList();
+    }
+
+    private void validateDirector(long directorId) {
+        if (directorStorage.findById(directorId).isEmpty()) {
+            log.warn("Ошибка при поиске фильмов. Режиссёр с id={} не найден", directorId);
+            throw new NotFoundException("Режиссёр с id=" + directorId + " не найден");
+        }
     }
 }

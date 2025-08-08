@@ -64,7 +64,7 @@ public class DirectorService {
             log.warn("Ошибка при удалении режиссёра. Режиссёр с id={} не найден", directorId);
             throw new NotFoundException("Режиссёр с id=" + directorId + " не найден");
         }
-        directorDbStorage.deleteFilmLike(directorId);
+        directorDbStorage.deleteFilmDirector(directorId);
     }
 
 }
