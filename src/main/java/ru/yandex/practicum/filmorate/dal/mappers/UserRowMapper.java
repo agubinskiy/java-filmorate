@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.dal.mappers;
 
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.ResultSet;
@@ -10,7 +9,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-@Component
 public class UserRowMapper implements RowMapper<User> {
     private final Map<Long, Set<Long>> friends;
 

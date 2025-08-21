@@ -17,6 +17,7 @@ public class FilmDto {
     private Long id;
 
     @NotBlank(message = "Название фильма не может быть пустым")
+    @Size(max = 40, message = "Название фильма не может быть длиннее 40 символов")
     private String name;
 
     @Size(max = 200, message = "Описание фильма не может быть длиннее 200 символов")
@@ -33,4 +34,7 @@ public class FilmDto {
     private List<GenreDto> genres;
 
     private Set<Long> likes;
+
+    @NotEmpty(message = "Должен быть указан хотя бы один режиссёр")
+    private List<DirectorDto> directors;
 }

@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rate;
@@ -32,6 +33,7 @@ public class InMemoryFilmStorageTest {
                 .duration(120)
                 .mpa(Rate.PG)
                 .genres(List.of(Genre.ACTION))
+                .directors(List.of(new Director(1L, "Director Name")))
                 .build();
         filmStorage.addFilm(film);
 
@@ -51,6 +53,7 @@ public class InMemoryFilmStorageTest {
                 .duration(120)
                 .mpa(Rate.PG)
                 .genres(List.of(Genre.ACTION))
+                .directors(List.of(new Director(1L, "Director Name")))
                 .build();
         Film film2 = Film.builder()
                 .id(1L)
@@ -60,6 +63,7 @@ public class InMemoryFilmStorageTest {
                 .duration(130)
                 .mpa(Rate.PG)
                 .genres(List.of(Genre.ACTION))
+                .directors(List.of(new Director(1L, "Director Name")))
                 .build();
         filmStorage.addFilm(film1);
         filmStorage.updateFilm(film2);
@@ -80,6 +84,7 @@ public class InMemoryFilmStorageTest {
                 .duration(120)
                 .mpa(Rate.PG)
                 .genres(List.of(Genre.ACTION))
+                .directors(List.of(new Director(1L, "Director Name")))
                 .build();
         Film film2 = Film.builder()
                 .id(2L)
@@ -89,6 +94,7 @@ public class InMemoryFilmStorageTest {
                 .duration(130)
                 .mpa(Rate.PG)
                 .genres(List.of(Genre.ACTION))
+                .directors(List.of(new Director(1L, "Director Name")))
                 .build();
         filmStorage.addFilm(film1);
         filmStorage.addFilm(film2);
@@ -112,6 +118,7 @@ public class InMemoryFilmStorageTest {
                 .duration(120)
                 .mpa(Rate.PG)
                 .genres(List.of(Genre.ACTION))
+                .directors(List.of(new Director(1L, "Director Name")))
                 .build();
         filmStorage.addFilm(film);
 
@@ -131,6 +138,7 @@ public class InMemoryFilmStorageTest {
                 .duration(120)
                 .mpa(Rate.PG)
                 .genres(List.of(Genre.ACTION))
+                .directors(List.of(new Director(1L, "Director Name")))
                 .build();
         filmStorage.addFilm(film);
 
@@ -150,6 +158,7 @@ public class InMemoryFilmStorageTest {
                 .duration(1)
                 .mpa(Rate.PG)
                 .genres(List.of(Genre.ACTION))
+                .directors(List.of(new Director(1L, "Director Name")))
                 .build();
         filmStorage.addFilm(film);
 

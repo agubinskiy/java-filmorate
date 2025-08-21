@@ -1,9 +1,6 @@
 package ru.yandex.practicum.filmorate.dto;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PastOrPresent;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import ru.yandex.practicum.filmorate.model.UpdateValidation;
 
@@ -18,8 +15,10 @@ public class UpdateUserRequest {
     private String email;
 
     @Pattern(regexp = "^\\S+$", message = "Логин не должен содержать пробелов", groups = UpdateValidation.class)
+    @Size(max = 40, message = "Логин пользователя не может быть длиннее 40 символов", groups = UpdateValidation.class)
     private String login;
 
+    @Size(max = 40, message = "Имя пользователя не может быть длиннее 40 символов", groups = UpdateValidation.class)
     private String name;
 
     @PastOrPresent(message = "Некорректная дата рождения", groups = UpdateValidation.class)

@@ -7,6 +7,7 @@ import lombok.Data;
 import ru.yandex.practicum.filmorate.model.UpdateValidation;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -14,6 +15,7 @@ public class UpdateFilmRequest {
     @NotNull(message = "Id не может быть пустым", groups = UpdateValidation.class)
     private Long id;
 
+    @Size(max = 40, message = "Название фильма не может быть длиннее 40 символов", groups = UpdateValidation.class)
     private String name;
 
     @Size(max = 200, message = "Описание фильма не может быть длиннее 200 символов",
@@ -28,6 +30,8 @@ public class UpdateFilmRequest {
     private Set<GenreDtoForFilm> genres;
 
     private RateDtoForFilm mpa;
+
+    private List<DirectorDtoForFilm> directors;
 
     public boolean hasName() {
         return !(name == null || name.isBlank());
@@ -51,5 +55,9 @@ public class UpdateFilmRequest {
 
     public boolean hasRate() {
         return !(mpa == null);
+    }
+
+    public boolean hasDirectors() {
+        return !(directors == null || directors.isEmpty());
     }
 }
